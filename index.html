@@ -770,43 +770,67 @@ function goEditPlan() {
   document.querySelector('.nav-item[data-page="page-plan"]').click();
 }
 function renderEditMode(plan, content) {
-  let html = "";
-  if (plan.rest) {
-    html += `<div class="rest-banner">
-      <div class="emoji">😌</div>
-      <h3>休息日</h3>
-      <p>休息日暂无动作，点击下方"添加动作"可把它变成训练日。</p>
+  const isRest = plan.rest;
+  // 顶部设置卡片：主题 + 休息日开关（所有天数都可编辑）
+  let html = `<div class="edit-card">
+    <div class="edit-row">
+      <label>主题</label>
+      <input type="text" id="ef-focus" value="${plan.focus}" placeholder="如 胸部 + 三头 / 休息日">
+    </div>
+    <div class="edit-row">
+      <label>休息</label>
+      <label style="flex:1;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);width:auto">
+        <input type="checkbox" id="ef-rest" ${isRest ? "checked" : ""} onchange="efToggleRest(this.checked)" style="width:20px;height:20px;flex:none"> 设为休息日
+      </label>
+    </div>
+    ${isRest ? `<div class="edit-row">
+      <label>提示</label>
+      <textarea id="ef-resttip" rows="2" placeholder="休息日安排，如拉伸、散步…">${plan.restTip || ""}</textarea>
+    </div>` : ""}
+  </div>`;
+
+  if (!isRest) {
+    (plan.exercises || []).forEach((ex, idx) => {
+      html += `<div class="edit-card" data-idx="${idx}">
+        <div class="edit-row">
+          <label>图标</label>
+          <input type="text" class="f-icon" value="${ex.icon}" maxlength="4" style="flex:0 0 60px;text-align:center">
+          <label style="width:auto">名称</label>
+          <input type="text" class="f-name" value="${ex.name}">
+          <button class="edit-del" onclick="delExercise(${idx})">删除</button>
+        </div>
+        <div class="edit-row">
+          <label>组数</label>
+          <input type="number" class="f-sets" value="${ex.sets}" min="1" max="20" style="flex:0 0 70px">
+          <label style="width:auto">次数</label>
+          <input type="text" class="f-reps" value="${ex.reps}" placeholder="如 12次 / 45秒">
+        </div>
+        <div class="edit-row">
+          <label>要点</label>
+          <textarea class="f-tip" rows="2">${ex.tip || ""}</textarea>
+        </div>
+      </div>`;
+    });
+    html += `<div class="edit-actions">
+      <button class="btn btn-blue" onclick="addExercise()">＋ 添加动作</button>
+      <button class="btn btn-green" onclick="saveCustomPlan()">💾 保存计划</button>
+    </div>`;
+  } else {
+    html += `<div class="edit-actions">
+      <button class="btn btn-green" onclick="saveCustomPlan()">💾 保存计划</button>
     </div>`;
   }
-  (plan.exercises || []).forEach((ex, idx) => {
-    html += `<div class="edit-card" data-idx="${idx}">
-      <div class="edit-row">
-        <label>图标</label>
-        <input type="text" class="f-icon" value="${ex.icon}" maxlength="4" style="flex:0 0 60px;text-align:center">
-        <label style="width:auto">名称</label>
-        <input type="text" class="f-name" value="${ex.name}">
-        <button class="edit-del" onclick="delExercise(${idx})">删除</button>
-      </div>
-      <div class="edit-row">
-        <label>组数</label>
-        <input type="number" class="f-sets" value="${ex.sets}" min="1" max="20" style="flex:0 0 70px">
-        <label style="width:auto">次数</label>
-        <input type="text" class="f-reps" value="${ex.reps}" placeholder="如 12次 / 45秒">
-      </div>
-      <div class="edit-row">
-        <label>要点</label>
-        <textarea class="f-tip" rows="2">${ex.tip || ""}</textarea>
-      </div>
-    </div>`;
-  });
-  html += `<div class="edit-actions">
-    <button class="btn btn-blue" onclick="addExercise()">＋ 添加动作</button>
-    <button class="btn btn-green" onclick="saveCustomPlan()">💾 保存计划</button>
-  </div>
-  <div class="edit-actions" style="margin-top:0">
+  html += `<div class="edit-actions" style="margin-top:0">
     <button class="btn btn-ghost" onclick="editMode=false;renderAll()">取消</button>
   </div>`;
   content.innerHTML = html;
+}
+function efToggleRest(checked) {
+  // 切换休息日/训练日：先收集当前编辑内容，再以新状态重绘
+  collectEditData();
+  store.customPlan[curDow].rest = checked;
+  saveStore();
+  renderDay();
 }
 function collectEditData() {
   // 收集当前编辑中的数据到 customPlan
@@ -815,6 +839,7 @@ function collectEditData() {
   if (!store.customPlan) store.customPlan = {};
   const exercises = [];
   cards.forEach(card => {
+    if (!card.querySelector(".f-name")) return; // 跳过顶部设置卡片
     exercises.push({
       icon: card.querySelector(".f-icon").value || "🏋️",
       name: card.querySelector(".f-name").value.trim() || "未命名动作",
@@ -823,11 +848,15 @@ function collectEditData() {
       tip: card.querySelector(".f-tip").value.trim()
     });
   });
+  const focusEl = document.getElementById("ef-focus");
+  const restEl = document.getElementById("ef-rest");
+  const tipEl = document.getElementById("ef-resttip");
+  const isRest = restEl ? restEl.checked : plan.rest;
   store.customPlan[curDow] = {
-    focus: plan.rest ? "自定义训练" : plan.focus,
-    rest: exercises.length === 0,
-    restTip: plan.restTip,
-    exercises
+    focus: focusEl && focusEl.value.trim() ? focusEl.value.trim() : plan.focus,
+    rest: isRest,
+    restTip: tipEl ? tipEl.value.trim() : (plan.restTip || ""),
+    exercises: isRest ? (plan.exercises || []) : exercises
   };
 }
 function addExercise() {
