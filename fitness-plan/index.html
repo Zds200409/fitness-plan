@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="健身计划">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>健身计划 · FitPlan</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-2: #273549;
+    --primary: #22c55e;
+    --accent: #f97316;
+    --blue: #0ea5e9;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --danger: #ef4444;
+    --radius: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+  input, select, textarea, button { font-family: inherit; }
+
+  /* ===== 顶部 ===== */
+  .header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(15,23,42,.92);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .header h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .header h1 .logo {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--primary), var(--blue));
+    display: inline-flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .date-line { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ===== 进度总览 ===== */
+  .overview {
+    margin: 14px 16px 0;
+    background: linear-gradient(135deg, #14532d 0%, #0f3b57 100%);
+    border-radius: var(--radius);
+    padding: 16px; display: flex; align-items: center; gap: 16px;
+  }
+  .ring-wrap { position: relative; width: 84px; height: 84px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-bg { stroke: rgba(255,255,255,.12); }
+  .ring-fg { stroke: var(--primary); stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+  .ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring-text .pct { font-size: 19px; font-weight: 700; }
+  .ring-text .lbl { font-size: 10px; color: rgba(255,255,255,.65); }
+  .overview-stats { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat .num { font-size: 20px; font-weight: 700; }
+  .stat .cap { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 2px; }
+
+  /* ===== 星期选择 ===== */
+  .day-tabs {
+    display: flex; gap: 8px; padding: 14px 16px 4px;
+    overflow-x: auto; scrollbar-width: none;
+    position: sticky; top: 63px; z-index: 40; background: var(--bg);
+  }
+  .day-tabs::-webkit-scrollbar { display: none; }
+  .day-tab {
+    flex: 0 0 auto; min-width: 52px; padding: 8px 4px; border-radius: 14px;
+    background: var(--card); border: 1.5px solid transparent;
+    text-align: center; cursor: pointer; transition: all .2s; user-select: none;
+  }
+  .day-tab .dow { font-size: 11px; color: var(--text-dim); }
+  .day-tab .dnum { font-size: 16px; font-weight: 700; margin-top: 2px; }
+  .day-tab .dot { width: 5px; height: 5px; border-radius: 50%; margin: 4px auto 0; background: transparent; }
+  .day-tab.has-plan .dot { background: var(--text-dim); }
+  .day-tab.active { background: var(--primary); border-color: var(--primary); }
+  .day-tab.active .dow, .day-tab.active .dnum { color: #052e16; }
+  .day-tab.active .dot { background: #052e16 !important; }
+  .day-tab.done-tab:not(.active) { border-color: rgba(34,197,94,.5); }
+  .day-tab.done-tab:not(.active) .dot { background: var(--primary) !important; }
+
+  /* ===== 当日计划 ===== */
+  .day-head { padding: 16px 16px 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .day-head h2 { font-size: 18px; }
+  .day-head .right { display: flex; gap: 8px; align-items: center; }
+  .focus-tag {
+    font-size: 12px; color: var(--accent);
+    background: rgba(249,115,22,.12); padding: 3px 10px; border-radius: 999px;
+    white-space: nowrap;
+  }
+  .edit-btn {
+    font-size: 12px; color: var(--blue);
+    background: rgba(14,165,233,.12); padding: 4px 12px; border-radius: 999px;
+    border: none; cursor: pointer; white-space: nowrap;
+  }
+  .edit-btn.on { background: var(--blue); color: #082f49; font-weight: 700; }
+  .rest-banner {
+    margin: 8px 16px; background: var(--card); border-radius: var(--radius);
+    padding: 28px 20px; text-align: center;
+  }
+  .rest-banner .emoji { font-size: 40px; }
+  .rest-banner p { color: var(--text-dim); font-size: 14px; margin-top: 10px; line-height: 1.7; }
+
+  /* ===== 动作卡片 ===== */
+  .exercise-card {
+    margin: 10px 16px; background: var(--card); border-radius: var(--radius);
+    overflow: hidden; transition: opacity .25s;
+  }
+  .exercise-card.done { opacity: .55; }
+  .ex-top { display: flex; align-items: center; gap: 12px; padding: 14px; cursor: pointer; user-select: none; }
+  .ex-icon {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    background: var(--card-2);
+  }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-name { font-size: 15px; font-weight: 600; }
+  .ex-name .cn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .ex-meta { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+  .ex-check {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--text-dim);
+    display: flex; align-items: center; justify-content: center;
+    color: transparent; font-size: 14px; transition: all .2s;
+  }
+  .exercise-card.done .ex-check { background: var(--primary); border-color: var(--primary); color: #052e16; }
+  .exercise-card.done .ex-name .cn { text-decoration: line-through; }
+
+  .ex-detail { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+  .exercise-card.open .ex-detail { max-height: 460px; }
+  .ex-detail-inner { padding: 0 14px 14px; border-top: 1px solid rgba(255,255,255,.06); }
+  .ex-sets { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .set-chip {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--card-2); border: 1.5px solid transparent;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--text-dim);
+    cursor: pointer; transition: all .15s; user-select: none;
+  }
+  .set-chip b { font-size: 13px; color: var(--text); }
+  .set-chip.hit { background: rgba(34,197,94,.18); border-color: var(--primary); color: var(--primary); }
+  .set-chip.hit b { color: var(--primary); }
+  .ex-tip { font-size: 12px; color: var(--text-dim); margin-top: 12px; line-height: 1.6; }
+  .ex-tip::before { content: "💡 "; }
+  .ex-timer-link {
+    display: inline-block; margin-top: 10px; font-size: 12px; color: var(--blue);
+    background: rgba(14,165,233,.12); padding: 5px 12px; border-radius: 999px;
+    border: none; cursor: pointer;
+  }
+
+  /* ===== 编辑模式 ===== */
+  .edit-card {
+    margin: 10px 16px; background: var(--card); border-radius: var(--radius);
+    padding: 14px; border: 1px dashed rgba(14,165,233,.4);
+  }
+  .edit-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .edit-row label { font-size: 11px; color: var(--text-dim); width: 38px; flex-shrink: 0; }
+  .edit-row input, .edit-row textarea {
+    flex: 1; background: var(--card-2); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px; color: var(--text); font-size: 13px; padding: 8px 10px;
+    outline: none; min-width: 0;
+  }
+  .edit-row input:focus, .edit-row textarea:focus { border-color: var(--blue); }
+  .edit-del {
+    background: rgba(239,68,68,.12); color: var(--danger); border: none;
+    border-radius: 8px; padding: 8px 10px; font-size: 12px; cursor: pointer; flex-shrink: 0;
+  }
+  .edit-actions { display: flex; gap: 8px; margin: 10px 16px; }
+  .btn {
+    flex: 1; border: none; border-radius: 12px; padding: 13px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .btn-blue { background: var(--blue); color: #082f49; }
+  .btn-ghost { background: var(--card); color: var(--text-dim); }
+  .btn-green { background: var(--primary); color: #052e16; }
+  .btn-red { background: rgba(239,68,68,.15); color: var(--danger); }
+
+  /* ===== 悬浮计时器 ===== */
+  .fab {
+    position: fixed; right: 16px; z-index: 70;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    width: 54px; height: 54px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #eab308);
+    border: none; font-size: 24px; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(249,115,22,.45);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fab.running { animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 4px 16px rgba(249,115,22,.45); } 50% { box-shadow: 0 4px 26px rgba(249,115,22,.85); } }
+  .timer-panel {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 80;
+    background: var(--card);
+    border-radius: 22px 22px 0 0;
+    padding: 18px 20px calc(20px + env(safe-area-inset-bottom));
+    transform: translateY(105%); transition: transform .3s ease;
+    box-shadow: 0 -8px 30px rgba(0,0,0,.5);
+  }
+  .timer-panel.show { transform: translateY(0); }
+  .tp-grab { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.2); margin: 0 auto 14px; }
+  .tp-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tp-tab {
+    flex: 1; padding: 9px; border-radius: 10px; border: none;
+    background: var(--card-2); color: var(--text-dim); font-size: 13px; cursor: pointer;
+  }
+  .tp-tab.on { background: var(--accent); color: #431407; font-weight: 700; }
+  .tp-display {
+    text-align: center; font-size: 52px; font-weight: 700;
+    font-variant-numeric: tabular-nums; letter-spacing: 2px; margin: 6px 0 14px;
+  }
+  .tp-presets { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+  .tp-preset {
+    border: 1px solid rgba(255,255,255,.15); background: transparent; color: var(--text);
+    border-radius: 999px; padding: 7px 16px; font-size: 13px; cursor: pointer;
+  }
+  .tp-preset.on { background: rgba(249,115,22,.2); border-color: var(--accent); color: var(--accent); }
+  .tp-controls { display: flex; gap: 10px; }
+  .tp-btn {
+    flex: 1; border: none; border-radius: 12px; padding: 14px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+  }
+  .tp-start { background: var(--primary); color: #052e16; }
+  .tp-pause { background: var(--accent); color: #431407; }
+  .tp-reset { background: var(--card-2); color: var(--text-dim); flex: 0 0 90px; }
+  .tp-mask {
+    position: fixed; inset: 0; z-index: 75; background: rgba(0,0,0,.45);
+    opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .tp-mask.show { opacity: 1; pointer-events: auto; }
+
+  /* ===== 记录页（体重/饮水） ===== */
+  .body-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
+  .body-card { background: var(--card); border-radius: var(--radius); padding: 16px; }
+  .body-card .bc-cap { font-size: 12px; color: var(--text-dim); }
+  .body-card .bc-val { font-size: 26px; font-weight: 700; margin-top: 4px; }
+  .body-card .bc-val small { font-size: 12px; color: var(--text-dim); font-weight: 400; }
+  .water-cups { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .cup { font-size: 18px; cursor: pointer; opacity: .25; transition: opacity .15s, transform .15s; user-select: none; }
+  .cup.full { opacity: 1; }
+  .cup:active { transform: scale(1.25); }
+  .weight-input-row { display: flex; gap: 8px; padding: 12px 16px 0; }
+  .weight-input-row input {
+    flex: 1; background: var(--card); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 12px; color: var(--text); font-size: 15px; padding: 13px 14px; outline: none;
+  }
+  .weight-input-row input:focus { border-color: var(--primary); }
+  .weight-input-row button { flex: 0 0 100px; }
+  .chart-card { margin: 12px 16px 0; background: var(--card); border-radius: var(--radius); padding: 16px; }
+  .chart-card h4 { font-size: 14px; margin-bottom: 10px; }
+  .chart-card svg { width: 100%; height: auto; display: block; }
+  .note-input { padding: 12px 16px 0; }
+  .note-input textarea {
+    width: 100%; background: var(--card); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 12px; color: var(--text); font-size: 13px; padding: 12px 14px;
+    outline: none; resize: none; min-height: 64px;
+  }
+  .meal-chips { display: flex; gap: 8px; padding: 10px 16px 0; flex-wrap: wrap; }
+  .meal-chip {
+    border: 1px solid rgba(255,255,255,.15); background: var(--card); color: var(--text-dim);
+    border-radius: 999px; padding: 8px 16px; font-size: 13px; cursor: pointer; user-select: none;
+  }
+  .meal-chip.on { background: rgba(34,197,94,.15); border-color: var(--primary); color: var(--primary); }
+  .history-item {
+    background: var(--card); border-radius: 12px; padding: 12px 14px; margin: 0 16px 8px;
+    display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+  }
+  .history-item .h-date { color: var(--text-dim); }
+  .history-item .h-val { font-weight: 600; }
+  .history-item .h-val .delta-up { color: var(--danger); font-size: 11px; margin-left: 6px; }
+  .history-item .h-val .delta-down { color: var(--primary); font-size: 11px; margin-left: 6px; }
+
+  /* ===== 底部导航 ===== */
+  .bottom-nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    background: rgba(30,41,59,.96);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,255,255,.08);
+    display: flex; padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-item {
+    flex: 1; padding: 8px 0 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    color: var(--text-dim); font-size: 11px; cursor: pointer; user-select: none;
+  }
+  .nav-item .ico { font-size: 20px; }
+  .nav-item.active { color: var(--primary); }
+
+  /* ===== 页面切换 ===== */
+  .page { display: none; }
+  .page.show { display: block; animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ===== 统计页 ===== */
+  .section-title { padding: 18px 16px 8px; font-size: 16px; font-weight: 700; }
+  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 0 16px; }
+  .week-cell {
+    aspect-ratio: 1; border-radius: 10px; background: var(--card);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--text-dim); gap: 2px;
+  }
+  .week-cell.full { background: rgba(34,197,94,.25); color: var(--primary); }
+  .week-cell.part { background: rgba(249,115,22,.2); color: var(--accent); }
+  .week-cell b { font-size: 13px; }
+  .record-list { padding: 0 16px; }
+  .record-item {
+    background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+  }
+  .record-item .r-date { color: var(--text-dim); }
+  .record-item .r-val { color: var(--primary); font-weight: 600; }
+  .empty-tip { text-align: center; color: var(--text-dim); font-size: 13px; padding: 30px 0; }
+
+  /* ===== 我的页 ===== */
+  .profile-card {
+    margin: 14px 16px; background: var(--card); border-radius: var(--radius); padding: 18px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #eab308);
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+  }
+  .profile-card .pname { font-size: 17px; font-weight: 700; }
+  .profile-card .psub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+  .menu-list { margin: 0 16px 12px; background: var(--card); border-radius: var(--radius); overflow: hidden; }
+  .menu-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 15px 16px; font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    cursor: pointer; user-select: none;
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item .arrow { margin-left: auto; color: var(--text-dim); }
+  .menu-item.warn { color: var(--danger); }
+  .menu-item input[type="time"] {
+    margin-left: auto; background: var(--card-2); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px; color: var(--text); font-size: 14px; padding: 6px 10px; outline: none;
+  }
+  .switch { margin-left: auto; position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+  .switch input { display: none; }
+  .switch .sl {
+    position: absolute; inset: 0; border-radius: 999px;
+    background: var(--card-2); transition: background .2s; cursor: pointer;
+  }
+  .switch .sl::after {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .2s;
+  }
+  .switch input:checked + .sl { background: var(--primary); }
+  .switch input:checked + .sl::after { left: 23px; }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%) translateY(20px);
+    background: var(--primary); color: #052e16;
+    font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 999px;
+    opacity: 0; pointer-events: none; transition: all .3s; z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===== 完成弹层 ===== */
+  .celebrate {
+    position: fixed; inset: 0; z-index: 90;
+    background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center;
+  }
+  .celebrate.show { display: flex; }
+  .cel-box {
+    background: var(--card); border-radius: 20px; padding: 30px 36px; text-align: center;
+    animation: pop .35s cubic-bezier(.2,1.6,.4,1);
+  }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .cel-box .big { font-size: 52px; }
+  .cel-box h3 { margin-top: 10px; font-size: 18px; }
+  .cel-box p { color: var(--text-dim); font-size: 13px; margin-top: 6px; }
+  .cel-btn {
+    margin-top: 18px; background: var(--primary); color: #052e16;
+    border: none; font-size: 14px; font-weight: 700;
+    padding: 11px 32px; border-radius: 999px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1><span class="logo">💪</span>健身计划</h1>
+  <div class="date-line" id="dateLine"></div>
+</header>
+
+<!-- ========== 计划页 ========== -->
+<div class="page show" id="page-plan">
+  <div class="overview">
+    <div class="ring-wrap">
+      <svg width="84" height="84">
+        <circle class="ring-bg" cx="42" cy="42" r="36" fill="none" stroke-width="8"/>
+        <circle class="ring-fg" id="ringFg" cx="42" cy="42" r="36" fill="none" stroke-width="8"
+                stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
+      </svg>
+      <div class="ring-text">
+        <span class="pct" id="pctText">0%</span>
+        <span class="lbl">本周完成</span>
+      </div>
+    </div>
+    <div class="overview-stats">
+      <div class="stat"><div class="num" id="statDone">0</div><div class="cap">已完成动作</div></div>
+      <div class="stat"><div class="num" id="statTotal">0</div><div class="cap">本周总动作</div></div>
+      <div class="stat"><div class="num" id="statDays">0</div><div class="cap">已练天数</div></div>
+      <div class="stat"><div class="num" id="statSets">0</div><div class="cap">完成组数</div></div>
+    </div>
+  </div>
+
+  <div class="day-tabs" id="dayTabs"></div>
+
+  <div class="day-head">
+    <h2 id="dayTitle">今日训练</h2>
+    <div class="right">
+      <span class="focus-tag" id="focusTag"></span>
+      <button class="edit-btn" id="editBtn" onclick="toggleEditMode()">✏️ 编辑</button>
+    </div>
+  </div>
+  <div id="dayContent"></div>
+</div>
+
+<!-- ========== 记录页（体重/饮水/饮食） ========== -->
+<div class="page" id="page-body">
+  <div class="section-title">今日身体记录</div>
+  <div class="body-cards">
+    <div class="body-card">
+      <div class="bc-cap">当前体重</div>
+      <div class="bc-val" id="curWeight">-- <small>kg</small></div>
+      <div class="bc-cap" id="weightDelta" style="margin-top:2px"></div>
+    </div>
+    <div class="body-card">
+      <div class="bc-cap">今日饮水 <span id="waterCount">0</span>/8 杯</div>
+      <div class="water-cups" id="waterCups"></div>
+    </div>
+  </div>
+
+  <div class="weight-input-row">
+    <input type="number" id="weightInput" step="0.1" min="20" max="300" placeholder="输入今日体重 kg">
+    <button class="btn btn-green" onclick="saveWeight()">记录体重</button>
+  </div>
+
+  <div class="section-title">饮食打卡</div>
+  <div class="meal-chips" id="mealChips"></div>
+  <div class="note-input">
+    <textarea id="dietNote" placeholder="今天吃了什么？简单记一笔…" onchange="saveDietNote()"></textarea>
+  </div>
+
+  <div class="chart-card">
+    <h4>📈 体重趋势（近 14 次记录）</h4>
+    <svg id="weightChart" viewBox="0 0 340 140"></svg>
+  </div>
+
+  <div class="section-title">历史体重</div>
+  <div id="weightHistory"></div>
+</div>
+
+<!-- ========== 统计页 ========== -->
+<div class="page" id="page-stats">
+  <div class="section-title">本周打卡</div>
+  <div class="week-grid" id="weekGrid"></div>
+  <div class="section-title">训练记录</div>
+  <div class="record-list" id="recordList"></div>
+</div>
+
+<!-- ========== 我的页 ========== -->
+<div class="page" id="page-me">
+  <div class="profile-card">
+    <div class="avatar">🏃</div>
+    <div>
+      <div class="pname">健身达人</div>
+      <div class="psub" id="joinDays">坚持就是胜利</div>
+    </div>
+  </div>
+
+  <div class="section-title">训练提醒</div>
+  <div class="menu-list">
+    <div class="menu-item">
+      ⏰ 每日提醒
+      <label class="switch" onclick="event.stopPropagation()">
+        <input type="checkbox" id="remindSwitch" onchange="toggleRemind()">
+        <span class="sl"></span>
+      </label>
+    </div>
+    <div class="menu-item" onclick="event.stopPropagation()">
+      🕖 提醒时间
+      <input type="time" id="remindTime" value="19:00" onchange="saveRemindTime()">
+    </div>
+  </div>
+
+  <div class="section-title">计划管理</div>
+  <div class="menu-list">
+    <div class="menu-item" onclick="goEditPlan()">✏️ 编辑训练计划 <span class="arrow">›</span></div>
+    <div class="menu-item" onclick="restoreDefaultPlan()">↩️ 恢复默认计划 <span class="arrow">›</span></div>
+  </div>
+
+  <div class="section-title">数据</div>
+  <div class="menu-list">
+    <div class="menu-item" onclick="exportData()">📤 导出全部数据 <span class="arrow">›</span></div>
+    <div class="menu-item warn" onclick="resetAll()">🗑️ 清空全部数据 <span class="arrow">›</span></div>
+  </div>
+</div>
+
+<!-- 悬浮计时按钮 -->
+<button class="fab" id="fabTimer" onclick="toggleTimerPanel()">⏱️</button>
+<div class="tp-mask" id="tpMask" onclick="toggleTimerPanel(false)"></div>
+<div class="timer-panel" id="timerPanel">
+  <div class="tp-grab"></div>
+  <div class="tp-tabs">
+    <button class="tp-tab on" id="tabDown" onclick="setTimerMode('down')">⏳ 休息倒计时</button>
+    <button class="tp-tab" id="tabUp" onclick="setTimerMode('up')">⏱️ 动作计时</button>
+  </div>
+  <div class="tp-display" id="tpDisplay">01:00</div>
+  <div class="tp-presets" id="tpPresets">
+    <button class="tp-preset" data-s="30" onclick="setPreset(this)">30秒</button>
+    <button class="tp-preset on" data-s="60" onclick="setPreset(this)">60秒</button>
+    <button class="tp-preset" data-s="90" onclick="setPreset(this)">90秒</button>
+    <button class="tp-preset" data-s="120" onclick="setPreset(this)">2分钟</button>
+  </div>
+  <div class="tp-controls">
+    <button class="tp-btn tp-reset" onclick="resetTimer()">重置</button>
+    <button class="tp-btn tp-start" id="tpStartBtn" onclick="startPauseTimer()">开始</button>
+  </div>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <div class="nav-item active" data-page="page-plan" onclick="switchPage(this)">
+    <span class="ico">📋</span>计划
+  </div>
+  <div class="nav-item" data-page="page-body" onclick="switchPage(this)">
+    <span class="ico">🍎</span>记录
+  </div>
+  <div class="nav-item" data-page="page-stats" onclick="switchPage(this)">
+    <span class="ico">📊</span>统计
+  </div>
+  <div class="nav-item" data-page="page-me" onclick="switchPage(this)">
+    <span class="ico">👤</span>我的
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<div class="celebrate" id="celebrate" onclick="this.classList.remove('show')">
+  <div class="cel-box">
+    <div class="big">🎉</div>
+    <h3>今日训练完成！</h3>
+    <p>太棒了，继续保持！</p>
+    <button class="cel-btn">好的</button>
+  </div>
+</div>
+
+<script>
+/* ================= 默认训练计划 ================= */
+const DEFAULT_PLAN = {
+  1: { focus: "胸部 + 三头", exercises: [
+    { icon: "🏋️", name: "俯卧撑", sets: 4, reps: "12-15次", tip: "核心收紧，身体成一条直线，下降时胸部接近地面。" },
+    { icon: "💪", name: "哑铃卧推", sets: 4, reps: "10-12次", tip: "肩胛骨收紧贴紧凳面，推起时不要锁死手肘。" },
+    { icon: "🦅", name: "哑铃飞鸟", sets: 3, reps: "12次", tip: "手肘微屈固定角度，感受胸肌拉伸与收缩。" },
+    { icon: "🪑", name: "凳上臂屈伸", sets: 3, reps: "12-15次", tip: "肩部下沉，下降到大臂与地面平行即可。" },
+    { icon: "🧗", name: "平板支撑", sets: 3, reps: "45秒", tip: "臀部不要塌陷或抬高，均匀呼吸。" }
+  ]},
+  2: { focus: "背部 + 二头", exercises: [
+    { icon: "🧲", name: "引体向上", sets: 4, reps: "6-10次", tip: "用背部发力而非手臂，下巴过杠。做不了可用弹力带辅助。" },
+    { icon: "🚣", name: "哑铃划船", sets: 4, reps: "12次/侧", tip: "背部保持平直，拉向髋部方向，顶峰收缩1秒。" },
+    { icon: "🔽", name: "俯身飞鸟", sets: 3, reps: "15次", tip: "小重量即可，感受后束发力，避免借力甩动。" },
+    { icon: "💪", name: "哑铃弯举", sets: 3, reps: "12次", tip: "大臂固定贴紧身体，不要前后摆动借力。" },
+    { icon: "🔨", name: "锤式弯举", sets: 3, reps: "12次", tip: "掌心相对，锻炼肱肌与前臂。" }
+  ]},
+  3: { focus: "腿部 + 核心", exercises: [
+    { icon: "🦵", name: "深蹲", sets: 4, reps: "15次", tip: "膝盖方向与脚尖一致，蹲至大腿与地面平行。" },
+    { icon: "🏹", name: "弓步蹲", sets: 3, reps: "12次/侧", tip: "前腿膝盖不超过脚尖，躯干保持直立。" },
+    { icon: "🌉", name: "臀桥", sets: 4, reps: "15次", tip: "顶峰夹紧臀部1-2秒，不要用腰部代偿。" },
+    { icon: "🐄", name: "提踵", sets: 4, reps: "20次", tip: "缓慢下落充分拉伸小腿，顶端停顿。" },
+    { icon: "🌀", name: "卷腹", sets: 3, reps: "20次", tip: "下背部贴地，用腹部卷起，不要拉脖子。" }
+  ]},
+  4: { focus: "休息日", rest: true,
+       restTip: "今天安排主动恢复：散步 30 分钟、全身拉伸 15 分钟，充分补水，保证 7-8 小时睡眠。" },
+  5: { focus: "肩部 + 有氧", exercises: [
+    { icon: "🏔️", name: "哑铃推举", sets: 4, reps: "10-12次", tip: "核心收紧避免腰部反弓，推至头顶上方。" },
+    { icon: "🪽", name: "侧平举", sets: 4, reps: "15次", tip: "小重量多次数，手肘略高于手腕，避免耸肩。" },
+    { icon: "↩️", name: "俯身侧平举", sets: 3, reps: "15次", tip: "针对肩后束，动作放慢感受发力。" },
+    { icon: "🤸", name: "开合跳", sets: 3, reps: "60秒", tip: "落地轻盈膝盖微屈缓冲，保持节奏。" },
+    { icon: "🏃", name: "原地高抬腿", sets: 3, reps: "45秒", tip: "大腿抬至与地面平行，前脚掌着地。" }
+  ]},
+  6: { focus: "全身循环", exercises: [
+    { icon: "🐻", name: "波比跳", sets: 4, reps: "10次", tip: "动作连贯，俯卧撑时身体成直线，跳起充分伸展。" },
+    { icon: "🧗", name: "登山跑", sets: 3, reps: "40秒", tip: "保持平板姿势稳定，快速交替提膝。" },
+    { icon: "🏋️", name: "深蹲跳", sets: 3, reps: "12次", tip: "落地缓冲回到深蹲位，膝盖对准脚尖。" },
+    { icon: "🤾", name: "弓步跳", sets: 3, reps: "10次/侧", tip: "轻落地，重心保持在两腿之间。" },
+    { icon: "🪢", name: "平板交替摸肩", sets: 3, reps: "20次", tip: "骨盆尽量不动，对抗身体旋转。" }
+  ]},
+  0: { focus: "休息日", rest: true,
+       restTip: "完全休息日。可以做轻松拉伸或泡沫轴放松，为下周训练储备能量。" }
+};
+
+const DOW_NAMES = ["周日","周一","周二","周三","周四","周五","周六"];
+const MEALS = ["🍳 早餐", "🍱 午餐", "🍜 晚餐", "🍎 加餐", "🥤 蛋白粉"];
+const STORE_KEY = "fitplan_data_v1";
+
+/* ================= 状态管理 ================= */
+let store = loadStore();
+let curDow = new Date().getDay();
+let editMode = false;
+
+function loadStore() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+  catch(e) { return {}; }
+}
+function saveStore() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(store));
+}
+function getPlan(dow) {
+  if (store.customPlan && store.customPlan[dow]) return store.customPlan[dow];
+  return DEFAULT_PLAN[dow];
+}
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function weekKey() {
+  const d = new Date();
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+function getWeekData() {
+  const k = weekKey();
+  if (!store[k]) store[k] = {};
+  return store[k];
+}
+function dayData(dow) {
+  const w = getWeekData();
+  if (!w[dow]) w[dow] = { done: [], sets: {} };
+  return w[dow];
+}
+function bodyLog(date) {
+  if (!store.bodyLog) store.bodyLog = {};
+  if (!store.bodyLog[date]) store.bodyLog[date] = { weight: null, water: 0, meals: [], note: "" };
+  return store.bodyLog[date];
+}
+function settings() {
+  if (!store.settings) store.settings = { remindOn: false, remindTime: "19:00", lastNotified: "" };
+  return store.settings;
+}
+
+/* ================= 渲染：星期标签 ================= */
+function renderTabs() {
+  const tabs = document.getElementById("dayTabs");
+  const order = [1,2,3,4,5,6,0];
+  const monday = new Date();
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+
+  tabs.innerHTML = "";
+  order.forEach((dow, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const plan = getPlan(dow);
+    const dd = dayData(dow);
+    const totalEx = plan.rest ? 0 : plan.exercises.length;
+    const allDone = totalEx > 0 && dd.done.length >= totalEx;
+
+    const el = document.createElement("div");
+    el.className = "day-tab" + (dow === curDow ? " active" : "")
+                 + (plan.rest ? "" : " has-plan")
+                 + (allDone ? " done-tab" : "");
+    el.innerHTML = `<div class="dow">${DOW_NAMES[dow].slice(1)}</div>
+                    <div class="dnum">${d.getDate()}</div>
+                    <div class="dot"></div>`;
+    el.onclick = () => { curDow = dow; renderAll(); };
+    tabs.appendChild(el);
+  });
+}
+
+/* ================= 渲染：当日内容 ================= */
+function renderDay() {
+  const plan = getPlan(curDow);
+  const content = document.getElementById("dayContent");
+  const today = new Date().getDay();
+
+  document.getElementById("dayTitle").textContent =
+    (curDow === today ? "今日训练 · " : "") + DOW_NAMES[curDow];
+  document.getElementById("focusTag").textContent = plan.focus;
+  document.getElementById("editBtn").className = "edit-btn" + (editMode ? " on" : "");
+  document.getElementById("editBtn").textContent = editMode ? "✓ 完成" : "✏️ 编辑";
+
+  if (editMode) { renderEditMode(plan, content); return; }
+
+  if (plan.rest) {
+    content.innerHTML = `<div class="rest-banner">
+      <div class="emoji">😌</div>
+      <h3>今日休息</h3>
+      <p>${plan.restTip || "好好休息，恢复体力。"}</p>
+    </div>`;
+    return;
+  }
+
+  const dd = dayData(curDow);
+  content.innerHTML = "";
+  plan.exercises.forEach((ex, idx) => {
+    const done = dd.done.includes(idx);
+    const hitSets = dd.sets[idx] || 0;
+    const isTimed = /秒|分钟/.test(ex.reps);
+
+    const card = document.createElement("div");
+    card.className = "exercise-card" + (done ? " done" : "");
+    card.innerHTML = `
+      <div class="ex-top">
+        <div class="ex-icon">${ex.icon}</div>
+        <div class="ex-info">
+          <div class="ex-name"><span class="cn">${ex.name}</span></div>
+          <div class="ex-meta">${ex.sets}组 × ${ex.reps} · 已做 ${hitSets}/${ex.sets} 组</div>
+        </div>
+        <div class="ex-check">✓</div>
+      </div>
+      <div class="ex-detail"><div class="ex-detail-inner">
+        <div class="ex-sets">
+          ${Array.from({length: ex.sets}, (_, s) =>
+            `<div class="set-chip ${s < hitSets ? 'hit' : ''}" data-set="${s}">
+               <b>第${s+1}组</b>${s < hitSets ? '✓' : ''}
+             </div>`).join("")}
+        </div>
+        <div class="ex-tip">${ex.tip || "注意动作标准，量力而行。"}</div>
+        <button class="ex-timer-link">${isTimed ? "⏱️ 打开动作计时" : "⏳ 组间休息计时"}</button>
+      </div></div>`;
+
+    card.querySelector(".ex-top").addEventListener("click", (e) => {
+      if (e.target.closest(".ex-check")) toggleExercise(idx);
+      else card.classList.toggle("open");
+    });
+    card.querySelector(".ex-check").addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleExercise(idx);
+    });
+    card.querySelectorAll(".set-chip").forEach(chip => {
+      chip.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleSet(idx, +chip.dataset.set);
+      });
+    });
+    card.querySelector(".ex-timer-link").addEventListener("click", (e) => {
+      e.stopPropagation();
+      setTimerMode(isTimed ? "up" : "down");
+      toggleTimerPanel(true);
+    });
+
+    content.appendChild(card);
+  });
+}
+
+/* ================= 编辑模式 ================= */
+function toggleEditMode() {
+  editMode = !editMode;
+  renderAll();
+}
+function goEditPlan() {
+  editMode = true;
+  document.querySelector('.nav-item[data-page="page-plan"]').click();
+}
+function renderEditMode(plan, content) {
+  let html = "";
+  if (plan.rest) {
+    html += `<div class="rest-banner">
+      <div class="emoji">😌</div>
+      <h3>休息日</h3>
+      <p>休息日暂无动作，点击下方"添加动作"可把它变成训练日。</p>
+    </div>`;
+  }
+  (plan.exercises || []).forEach((ex, idx) => {
+    html += `<div class="edit-card" data-idx="${idx}">
+      <div class="edit-row">
+        <label>图标</label>
+        <input type="text" class="f-icon" value="${ex.icon}" maxlength="4" style="flex:0 0 60px;text-align:center">
+        <label style="width:auto">名称</label>
+        <input type="text" class="f-name" value="${ex.name}">
+        <button class="edit-del" onclick="delExercise(${idx})">删除</button>
+      </div>
+      <div class="edit-row">
+        <label>组数</label>
+        <input type="number" class="f-sets" value="${ex.sets}" min="1" max="20" style="flex:0 0 70px">
+        <label style="width:auto">次数</label>
+        <input type="text" class="f-reps" value="${ex.reps}" placeholder="如 12次 / 45秒">
+      </div>
+      <div class="edit-row">
+        <label>要点</label>
+        <textarea class="f-tip" rows="2">${ex.tip || ""}</textarea>
+      </div>
+    </div>`;
+  });
+  html += `<div class="edit-actions">
+    <button class="btn btn-blue" onclick="addExercise()">＋ 添加动作</button>
+    <button class="btn btn-green" onclick="saveCustomPlan()">💾 保存计划</button>
+  </div>
+  <div class="edit-actions" style="margin-top:0">
+    <button class="btn btn-ghost" onclick="editMode=false;renderAll()">取消</button>
+  </div>`;
+  content.innerHTML = html;
+}
+function collectEditData() {
+  // 收集当前编辑中的数据到 customPlan
+  const cards = document.querySelectorAll("#dayContent .edit-card");
+  const plan = getPlan(curDow);
+  if (!store.customPlan) store.customPlan = {};
+  const exercises = [];
+  cards.forEach(card => {
+    exercises.push({
+      icon: card.querySelector(".f-icon").value || "🏋️",
+      name: card.querySelector(".f-name").value.trim() || "未命名动作",
+      sets: Math.max(1, parseInt(card.querySelector(".f-sets").value) || 3),
+      reps: card.querySelector(".f-reps").value.trim() || "10次",
+      tip: card.querySelector(".f-tip").value.trim()
+    });
+  });
+  store.customPlan[curDow] = {
+    focus: plan.rest ? "自定义训练" : plan.focus,
+    rest: exercises.length === 0,
+    restTip: plan.restTip,
+    exercises
+  };
+}
+function addExercise() {
+  collectEditData();
+  store.customPlan[curDow].rest = false;
+  store.customPlan[curDow].exercises.push({ icon: "🏋️", name: "新动作", sets: 3, reps: "12次", tip: "" });
+  saveStore();
+  renderDay();
+}
+function delExercise(idx) {
+  collectEditData();
+  store.customPlan[curDow].exercises.splice(idx, 1);
+  saveStore();
+  renderDay();
+}
+function saveCustomPlan() {
+  collectEditData();
+  saveStore();
+  editMode = false;
+  renderAll();
+  toast("计划已保存 ✓");
+}
+function restoreDefaultPlan() {
+  if (!confirm("恢复默认计划？你的自定义修改将丢失（打卡记录保留）。")) return;
+  delete store.customPlan;
+  saveStore();
+  editMode = false;
+  renderAll();
+  toast("已恢复默认计划");
+}
+
+/* ================= 打卡逻辑 ================= */
+function toggleExercise(idx) {
+  const dd = dayData(curDow);
+  const i = dd.done.indexOf(idx);
+  if (i >= 0) {
+    dd.done.splice(i, 1);
+  } else {
+    dd.done.push(idx);
+    dd.sets[idx] = getPlan(curDow).exercises[idx].sets;
+    const total = getPlan(curDow).exercises.length;
+    if (dd.done.length === total) {
+      saveStore(); renderAll();
+      document.getElementById("celebrate").classList.add("show");
+      return;
+    }
+  }
+  saveStore();
+  renderAll();
+}
+function toggleSet(idx, setIdx) {
+  const dd = dayData(curDow);
+  const cur = dd.sets[idx] || 0;
+  dd.sets[idx] = (setIdx < cur) ? setIdx : setIdx + 1;
+  const total = getPlan(curDow).exercises[idx].sets;
+  const doneIdx = dd.done.indexOf(idx);
+  if (dd.sets[idx] >= total && doneIdx < 0) dd.done.push(idx);
+  if (dd.sets[idx] < total && doneIdx >= 0) dd.done.splice(doneIdx, 1);
+  saveStore();
+  renderAll();
+}
+
+/* ================= 进度总览 ================= */
+function renderOverview() {
+  const w = getWeekData();
+  let done = 0, total = 0, sets = 0, days = 0;
+  Object.keys(DEFAULT_PLAN).forEach(dow => {
+    const p = getPlan(dow);
+    if (p.rest) return;
+    total += p.exercises.length;
+    const dd = w[dow];
+    if (dd) {
+      done += dd.done.length;
+      days += (dd.done.length >= p.exercises.length) ? 1 : 0;
+      Object.values(dd.sets).forEach(n => sets += n);
+    }
+  });
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById("pctText").textContent = pct + "%";
+  document.getElementById("statDone").textContent = done;
+  document.getElementById("statTotal").textContent = total;
+  document.getElementById("statDays").textContent = days;
+  document.getElementById("statSets").textContent = sets;
+  const C = 2 * Math.PI * 36;
+  document.getElementById("ringFg").style.strokeDashoffset = C * (1 - pct / 100);
+}
+
+/* ================= 统计页 ================= */
+function renderStats() {
+  const w = getWeekData();
+  const order = [1,2,3,4,5,6,0];
+  const grid = document.getElementById("weekGrid");
+  grid.innerHTML = "";
+  order.forEach(dow => {
+    const p = getPlan(dow);
+    const dd = w[dow];
+    let cls = "", val = "休";
+    if (!p.rest) {
+      const n = dd ? dd.done.length : 0;
+      val = n + "/" + p.exercises.length;
+      if (n >= p.exercises.length) cls = "full";
+      else if (n > 0) cls = "part";
+    }
+    grid.innerHTML += `<div class="week-cell ${cls}"><span>${DOW_NAMES[dow].slice(1)}</span><b>${val}</b></div>`;
+  });
+
+  const list = document.getElementById("recordList");
+  const weekKeys = Object.keys(store).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort().reverse();
+  let has = false;
+  list.innerHTML = "";
+  weekKeys.forEach(wk => {
+    Object.keys(store[wk]).sort((a,b)=>a-b).forEach(dow => {
+      const dd = store[wk][dow];
+      const p = getPlan(dow);
+      if (!dd || !dd.done || !dd.done.length || p.rest) return;
+      has = true;
+      const sets = Object.values(dd.sets).reduce((a,b)=>a+b, 0);
+      list.innerHTML += `<div class="record-item">
+        <span class="r-date">${wk} 周 · ${DOW_NAMES[dow]} · ${p.focus}</span>
+        <span class="r-val">${dd.done.length}动作 / ${sets}组</span>
+      </div>`;
+    });
+  });
+  if (!has) list.innerHTML = `<div class="empty-tip">还没有训练记录，开始第一次训练吧！</div>`;
+}
+
+/* ================= 记录页：体重/饮水/饮食 ================= */
+function renderBodyPage() {
+  const log = bodyLog(todayStr());
+
+  // 当前体重 = 最近一次有记录的体重
+  const dates = Object.keys(store.bodyLog || {}).filter(d => store.bodyLog[d].weight).sort();
+  const latest = dates.length ? store.bodyLog[dates[dates.length-1]].weight : null;
+  document.getElementById("curWeight").innerHTML = latest ? `${latest} <small>kg</small>` : `-- <small>kg</small>`;
+
+  // 与上次对比
+  let deltaHtml = "";
+  if (dates.length >= 2) {
+    const prev = store.bodyLog[dates[dates.length-2]].weight;
+    const diff = (latest - prev).toFixed(1);
+    if (diff > 0) deltaHtml = `<span style="color:var(--danger)">▲ +${diff} kg</span> 较上次`;
+    else if (diff < 0) deltaHtml = `<span style="color:var(--primary)">▼ ${diff} kg</span> 较上次`;
+    else deltaHtml = "— 与上次持平";
+  }
+  document.getElementById("weightDelta").innerHTML = deltaHtml;
+
+  // 饮水
+  document.getElementById("waterCount").textContent = log.water;
+  const cups = document.getElementById("waterCups");
+  cups.innerHTML = "";
+  for (let i = 0; i < 8; i++) {
+    const c = document.createElement("span");
+    c.className = "cup" + (i < log.water ? " full" : "");
+    c.textContent = "🥛";
+    c.onclick = () => {
+      log.water = (i < log.water && i === log.water - 1) ? i : i + 1;
+      saveStore(); renderBodyPage();
+    };
+    cups.appendChild(c);
+  }
+
+  // 饮食打卡
+  const chips = document.getElementById("mealChips");
+  chips.innerHTML = "";
+  MEALS.forEach(m => {
+    const on = log.meals.includes(m);
+    const chip = document.createElement("div");
+    chip.className = "meal-chip" + (on ? " on" : "");
+    chip.textContent = m;
+    chip.onclick = () => {
+      const i = log.meals.indexOf(m);
+      if (i >= 0) log.meals.splice(i, 1); else log.meals.push(m);
+      saveStore(); renderBodyPage();
+    };
+    chips.appendChild(chip);
+  });
+  document.getElementById("dietNote").value = log.note || "";
+
+  renderWeightChart();
+  renderWeightHistory();
+}
+function saveWeight() {
+  const v = parseFloat(document.getElementById("weightInput").value);
+  if (!v || v < 20 || v > 300) { toast("请输入有效体重"); return; }
+  const log = bodyLog(todayStr());
+  log.weight = Math.round(v * 10) / 10;
+  saveStore();
+  document.getElementById("weightInput").value = "";
+  renderBodyPage();
+  toast("体重已记录 ✓");
+}
+function saveDietNote() {
+  bodyLog(todayStr()).note = document.getElementById("dietNote").value;
+  saveStore();
+}
+function renderWeightChart() {
+  const svg = document.getElementById("weightChart");
+  const dates = Object.keys(store.bodyLog || {}).filter(d => store.bodyLog[d].weight).sort().slice(-14);
+  if (dates.length < 2) {
+    svg.innerHTML = `<text x="170" y="70" text-anchor="middle" fill="#94a3b8" font-size="12">记录 2 次以上体重后显示趋势图</text>`;
+    return;
+  }
+  const vals = dates.map(d => store.bodyLog[d].weight);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const pad = (max - min) * 0.2 || 1;
+  const lo = min - pad, hi = max + pad;
+  const W = 340, H = 140, PL = 34, PR = 10, PT = 12, PB = 22;
+  const x = i => PL + (W - PL - PR) * i / (vals.length - 1);
+  const y = v => PT + (H - PT - PB) * (1 - (v - lo) / (hi - lo));
+  let path = "", dots = "", labels = "";
+  vals.forEach((v, i) => {
+    path += (i ? " L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1);
+    dots += `<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="#22c55e"/>`;
+    if (i === 0 || i === vals.length - 1 || vals.length <= 7) {
+      labels += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle" fill="#94a3b8" font-size="9">${dates[i].slice(5)}</text>
+                 <text x="${x(i)}" y="${y(v) - 8}" text-anchor="middle" fill="#f1f5f9" font-size="9">${v}</text>`;
+    }
+  });
+  const area = path + ` L${x(vals.length-1)} ${H-PB} L${x(0)} ${H-PB} Z`;
+  svg.innerHTML = `
+    <path d="${area}" fill="rgba(34,197,94,.12)"/>
+    <path d="${path}" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
+    ${dots}${labels}`;
+}
+function renderWeightHistory() {
+  const wrap = document.getElementById("weightHistory");
+  const dates = Object.keys(store.bodyLog || {}).filter(d => store.bodyLog[d].weight).sort().reverse();
+  if (!dates.length) {
+    wrap.innerHTML = `<div class="empty-tip">暂无体重记录</div>`;
+    return;
+  }
+  wrap.innerHTML = "";
+  dates.slice(0, 10).forEach((d, i) => {
+    const w = store.bodyLog[d].weight;
+    let delta = "";
+    if (i < dates.length - 1) {
+      const prev = store.bodyLog[dates[i+1]].weight;
+      const diff = (w - prev).toFixed(1);
+      if (diff > 0) delta = `<span class="delta-up">+${diff}</span>`;
+      else if (diff < 0) delta = `<span class="delta-down">${diff}</span>`;
+    }
+    wrap.innerHTML += `<div class="history-item">
+      <span class="h-date">${d}</span>
+      <span class="h-val">${w} kg${delta}</span>
+    </div>`;
+  });
+}
+
+/* ================= 计时器 ================= */
+let timerMode = "down";       // down=倒计时 up=正计时
+let timerRemain = 60;         // 倒计时剩余秒
+let timerUp = 0;              // 正计时秒
+let timerRunning = false;
+let timerInt = null;
+let presetSec = 60;
+
+function fmt(s) {
+  return String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
+}
+function toggleTimerPanel(force) {
+  const p = document.getElementById("timerPanel");
+  const m = document.getElementById("tpMask");
+  const show = force !== undefined ? force : !p.classList.contains("show");
+  p.classList.toggle("show", show);
+  m.classList.toggle("show", show);
+}
+function setTimerMode(mode) {
+  timerMode = mode;
+  stopTimerInt();
+  document.getElementById("tabDown").classList.toggle("on", mode === "down");
+  document.getElementById("tabUp").classList.toggle("on", mode === "up");
+  document.getElementById("tpPresets").style.display = mode === "down" ? "flex" : "none";
+  updateDisplay();
+}
+function setPreset(el) {
+  document.querySelectorAll(".tp-preset").forEach(b => b.classList.remove("on"));
+  el.classList.add("on");
+  presetSec = +el.dataset.s;
+  timerRemain = presetSec;
+  stopTimerInt();
+  updateDisplay();
+}
+function updateDisplay() {
+  document.getElementById("tpDisplay").textContent = timerMode === "down" ? fmt(timerRemain) : fmt(timerUp);
+  document.getElementById("tpStartBtn").textContent = timerRunning ? "暂停" : "开始";
+  document.getElementById("tpStartBtn").className = "tp-btn " + (timerRunning ? "tp-pause" : "tp-start");
+  document.getElementById("fabTimer").classList.toggle("running", timerRunning);
+}
+function startPauseTimer() {
+  if (timerRunning) { stopTimerInt(); updateDisplay(); return; }
+  timerRunning = true;
+  timerInt = setInterval(() => {
+    if (timerMode === "down") {
+      timerRemain--;
+      if (timerRemain <= 0) {
+        stopTimerInt();
+        timerRemain = presetSec;
+        beep();
+        if (navigator.vibrate) navigator.vibrate([200,100,200]);
+        toast("⏰ 休息结束，开始下一组！");
+      }
+    } else {
+      timerUp++;
+    }
+    updateDisplay();
+  }, 1000);
+  updateDisplay();
+}
+function stopTimerInt() {
+  timerRunning = false;
+  if (timerInt) { clearInterval(timerInt); timerInt = null; }
+}
+function resetTimer() {
+  stopTimerInt();
+  timerRemain = presetSec;
+  timerUp = 0;
+  updateDisplay();
+}
+function beep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.25, 0.5].forEach(t => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.25, ctx.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.2);
+      o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.2);
+    });
+  } catch(e) {}
+}
+
+/* ================= 训练提醒 ================= */
+function toggleRemind() {
+  const on = document.getElementById("remindSwitch").checked;
+  const s = settings();
+  if (on) {
+    if (!("Notification" in window)) {
+      toast("当前浏览器不支持通知");
+      document.getElementById("remindSwitch").checked = false;
+      return;
+    }
+    Notification.requestPermission().then(p => {
+      if (p === "granted") {
+        s.remindOn = true; saveStore();
+        toast("提醒已开启 ✓");
+      } else {
+        toast("请允许通知权限");
+        document.getElementById("remindSwitch").checked = false;
+        s.remindOn = false; saveStore();
+      }
+    });
+  } else {
+    s.remindOn = false; saveStore();
+    toast("提醒已关闭");
+  }
+}
+function saveRemindTime() {
+  settings().remindTime = document.getElementById("remindTime").value || "19:00";
+  saveStore();
+  toast("提醒时间已保存 ✓");
+}
+function checkReminder() {
+  const s = settings();
+  if (!s.remindOn) return;
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const now = new Date();
+  const hm = String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
+  const today = todayStr();
+  if (hm === s.remindTime && s.lastNotified !== today) {
+    const plan = getPlan(now.getDay());
+    s.lastNotified = today; saveStore();
+    new Notification("💪 该训练啦！", {
+      body: plan.rest ? "今天是休息日，记得拉伸放松哦~" : `今日计划：${plan.focus}，加油！`
+    });
+  }
+}
+setInterval(checkReminder, 30000);
+
+/* ================= 页面切换 & 工具 ================= */
+function switchPage(el) {
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  el.classList.add("active");
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("show"));
+  document.getElementById(el.dataset.page).classList.add("show");
+  if (el.dataset.page === "page-stats") renderStats();
+  if (el.dataset.page === "page-body") renderBodyPage();
+  window.scrollTo(0, 0);
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(store, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "fitplan-data.json";
+  a.click();
+  toast("数据已导出");
+}
+function resetAll() {
+  if (confirm("确定清空全部数据吗？包括打卡、体重、自定义计划，不可恢复。")) {
+    store = {};
+    saveStore();
+    renderAll();
+    toast("数据已清空");
+  }
+}
+function renderAll() {
+  renderTabs();
+  renderDay();
+  renderOverview();
+}
+
+/* ================= 初始化 ================= */
+document.getElementById("dateLine").textContent =
+  new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric", weekday: "long" });
+document.getElementById("joinDays").textContent =
+  "本周已记录 " + Object.keys(getWeekData()).length + " 天数据";
+document.getElementById("remindSwitch").checked = settings().remindOn;
+document.getElementById("remindTime").value = settings().remindTime;
+setTimerMode("down");
+renderAll();
+</script>
+</body>
+</html>
