@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="健身计划">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#f2f3f8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -15,10 +15,10 @@
 <title>健身计划 · FitPlan</title>
 <style>
   :root {
-    --bg: #0f172a; --card: #1e293b; --card-2: #273549;
+    --bg: #f2f3f8; --card: #ffffff; --card-2: #eceef5;
     --primary: #22c55e; --accent: #f97316; --blue: #0ea5e9;
     --purple: #a855f7;
-    --text: #f1f5f9; --text-dim: #94a3b8; --danger: #ef4444;
+    --text: #1f2937; --text-dim: #64748b; --danger: #ef4444;
     --radius: 16px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -32,10 +32,10 @@
 
   .header {
     position: sticky; top: 0; z-index: 50;
-    background: rgba(15,23,42,.92);
+    background: rgba(255,255,255,.92);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
-    border-bottom: 1px solid rgba(255,255,255,.06);
+    border-bottom: 1px solid rgba(15,23,42,.07);
   }
   .header h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
   .header h1 .logo {
@@ -129,7 +129,7 @@
 
   .ex-detail { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
   .exercise-card.open .ex-detail { max-height: 900px; }
-  .ex-detail-inner { padding: 0 14px 14px; border-top: 1px solid rgba(255,255,255,.06); }
+  .ex-detail-inner { padding: 0 14px 14px; border-top: 1px solid rgba(15,23,42,.07); }
   .ex-sets { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .set-chip {
     width: 44px; height: 44px; border-radius: 10px;
@@ -164,7 +164,7 @@
   .edit-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
   .edit-row label { font-size: 11px; color: var(--text-dim); width: 38px; flex-shrink: 0; }
   .edit-row input, .edit-row textarea {
-    flex: 1; background: var(--card-2); border: 1px solid rgba(255,255,255,.1);
+    flex: 1; background: var(--card-2); border: 1px solid rgba(15,23,42,.12);
     border-radius: 8px; color: var(--text); font-size: 13px; padding: 8px 10px;
     outline: none; min-width: 0;
   }
@@ -176,7 +176,7 @@
   .edit-actions { display: flex; gap: 8px; margin: 10px 16px; }
   .btn { flex: 1; border: none; border-radius: 12px; padding: 13px; font-size: 14px; font-weight: 600; cursor: pointer; }
   .btn-blue { background: var(--blue); color: #082f49; }
-  .btn-ghost { background: var(--card); color: var(--text-dim); }
+  .btn-ghost { background: var(--card-2); color: var(--text-dim); }
   .btn-green { background: var(--primary); color: #052e16; }
   .btn-red { background: rgba(239,68,68,.15); color: var(--danger); }
   .btn-orange { background: var(--accent); color: #431407; }
@@ -217,7 +217,7 @@
   .gen-grid label { font-size: 11px; color: var(--text-dim); display: block; }
   .gen-grid select {
     width: 100%; margin-top: 5px; background: var(--card-2);
-    border: 1px solid rgba(255,255,255,.12); border-radius: 10px;
+    border: 1px solid rgba(15,23,42,.14); border-radius: 10px;
     color: var(--text); font-size: 14px; padding: 10px 12px; outline: none;
   }
 
@@ -299,7 +299,7 @@
   .cup:active { transform: scale(1.25); }
   .weight-input-row { display: flex; gap: 8px; padding: 12px 16px 0; }
   .weight-input-row input {
-    flex: 1; background: var(--card); border: 1px solid rgba(255,255,255,.1);
+    flex: 1; background: var(--card); border: 1px solid rgba(15,23,42,.12);
     border-radius: 12px; color: var(--text); font-size: 15px; padding: 13px 14px; outline: none;
   }
   .weight-input-row input:focus { border-color: var(--primary); }
@@ -327,28 +327,28 @@
   .food-sheet.show { transform: translateY(0); }
   .fs-head { padding: 14px 16px 8px; }
   .fs-search {
-    width: 100%; background: var(--card-2); border: 1px solid rgba(255,255,255,.1);
+    width: 100%; background: var(--card-2); border: 1px solid rgba(15,23,42,.12);
     border-radius: 10px; color: var(--text); font-size: 14px; padding: 11px 12px; outline: none;
   }
   .fs-cats { display: flex; gap: 6px; padding: 8px 16px; overflow-x: auto; scrollbar-width: none; }
   .fs-cats::-webkit-scrollbar { display: none; }
   .fs-cat {
-    flex: 0 0 auto; border: 1px solid rgba(255,255,255,.12); background: transparent; color: var(--text-dim);
+    flex: 0 0 auto; border: 1px solid rgba(15,23,42,.14); background: transparent; color: var(--text-dim);
     border-radius: 999px; padding: 6px 14px; font-size: 12px; cursor: pointer;
   }
   .fs-cat.on { background: rgba(249,115,22,.2); border-color: var(--accent); color: var(--accent); }
   .fs-list { overflow-y: auto; padding: 0 16px calc(16px + env(safe-area-inset-bottom)); }
   .fs-food {
     display: flex; align-items: center; gap: 10px; padding: 12px 4px;
-    border-bottom: 1px solid rgba(255,255,255,.05); cursor: pointer;
+    border-bottom: 1px solid rgba(15,23,42,.06); cursor: pointer;
   }
   .fs-food .ff-name { flex: 1; font-size: 14px; }
   .fs-food .ff-name small { display: block; font-size: 11px; color: var(--text-dim); margin-top: 2px; }
   .fs-food .ff-kcal { font-size: 13px; color: var(--accent); font-weight: 600; white-space: nowrap; }
-  .fs-custom { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,.08); }
+  .fs-custom { padding: 12px 16px; border-top: 1px solid rgba(15,23,42,.09); }
   .fs-custom-row { display: flex; gap: 6px; margin-bottom: 8px; }
   .fs-custom-row input {
-    flex: 1; min-width: 0; background: var(--card-2); border: 1px solid rgba(255,255,255,.1);
+    flex: 1; min-width: 0; background: var(--card-2); border: 1px solid rgba(15,23,42,.12);
     border-radius: 8px; color: var(--text); font-size: 12px; padding: 9px 10px; outline: none;
   }
 
@@ -369,12 +369,12 @@
   .qty-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
   .qty-row label { font-size: 12px; color: var(--text-dim); width: 56px; flex-shrink: 0; }
   .qty-row input, .qty-row select {
-    flex: 1; background: var(--card-2); border: 1px solid rgba(255,255,255,.1);
+    flex: 1; background: var(--card-2); border: 1px solid rgba(15,23,42,.12);
     border-radius: 10px; color: var(--text); font-size: 15px; padding: 11px 12px; outline: none;
   }
   .qty-quick { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
   .qty-quick button {
-    border: 1px solid rgba(255,255,255,.12); background: transparent; color: var(--text);
+    border: 1px solid rgba(15,23,42,.14); background: transparent; color: var(--text);
     border-radius: 999px; padding: 7px 14px; font-size: 12px; cursor: pointer;
   }
 
@@ -384,7 +384,7 @@
     background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
     display: flex; align-items: center; gap: 10px; font-size: 13px;
   }
-  .photo-item input { background: var(--card-2); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: var(--text); padding: 7px 8px; font-size: 13px; outline: none; min-width: 0; }
+  .photo-item input { background: var(--card-2); border: 1px solid rgba(15,23,42,.12); border-radius: 8px; color: var(--text); padding: 7px 8px; font-size: 13px; outline: none; min-width: 0; }
   .photo-thumb { width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; }
   .analyzing { text-align: center; padding: 20px; color: var(--text-dim); font-size: 13px; }
   .analyzing .spin { display: inline-block; animation: spin 1s linear infinite; font-size: 24px; }
@@ -398,10 +398,10 @@
   .guide-page.show { display: block; animation: fadeIn .25s ease; }
   .gp-head {
     position: sticky; top: 0; z-index: 5;
-    background: rgba(15,23,42,.95); backdrop-filter: blur(10px);
+    background: rgba(255,255,255,.95); backdrop-filter: blur(10px);
     padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
     display: flex; align-items: center; gap: 12px;
-    border-bottom: 1px solid rgba(255,255,255,.06);
+    border-bottom: 1px solid rgba(15,23,42,.07);
   }
   .gp-back {
     background: var(--card); border: none; color: var(--text);
@@ -442,6 +442,31 @@
     border: none; cursor: pointer; margin-left: 8px;
   }
 
+
+  /* 浅色模板布局（汇总卡+动作网格） */
+  .dsum { margin: 10px 16px; background: var(--card); border-radius: var(--radius); padding: 16px; border: 1px solid rgba(15,23,42,.06); }
+  .dsum-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+  .dsum-body { display: flex; gap: 12px; }
+  .dsum-info { flex: 1; min-width: 0; }
+  .dsum-line { font-size: 12px; color: var(--text-dim); line-height: 2; }
+  .dsum-muscles { margin-top: 8px; font-size: 11px; color: var(--text-dim); line-height: 1.8; }
+  .dsum-muscles b { color: var(--text); font-size: 12px; }
+  .dsum-fig { width: 92px; flex-shrink: 0; background: var(--card-2); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .dsum-fig svg { width: 72px; height: 144px; }
+  .sec-label { padding: 14px 16px 8px; font-size: 14px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; }
+  .sec-label span { font-size: 11px; color: var(--text-dim); font-weight: 400; }
+  .ex-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
+  .exg-card { background: var(--card); border-radius: 14px; padding: 14px 12px; position: relative; cursor: pointer; border: 1.5px solid rgba(15,23,42,.06); transition: opacity .2s, border-color .2s; user-select: none; }
+  .exg-card.done { border-color: var(--primary); opacity: .6; }
+  .exg-card.warm { background: var(--card-2); }
+  .exg-check { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--text-dim); color: transparent; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  .exg-card.done .exg-check { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .exg-ico { font-size: 28px; }
+  .exg-name { font-size: 14px; font-weight: 600; margin-top: 8px; }
+  .exg-tags { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  .exg-prog { font-size: 10px; color: var(--blue); margin-top: 6px; }
+  .gp-actions { display: flex; gap: 8px; margin-top: 12px; }
+
   /* 图标选择器 */
   .emoji-mask {
     position: fixed; inset: 0; z-index: 96; background: rgba(0,0,0,.5);
@@ -467,7 +492,7 @@
   .emoji-cell:active { transform: scale(1.2); border-color: var(--blue); }
   .f-icon-pick {
     flex: 0 0 60px; height: 38px; background: var(--card-2);
-    border: 1px solid rgba(255,255,255,.1); border-radius: 8px;
+    border: 1px solid rgba(15,23,42,.12); border-radius: 8px;
     font-size: 20px; cursor: pointer; text-align: center; line-height: 1;
   }
 
@@ -491,13 +516,13 @@
     box-shadow: 0 -8px 30px rgba(0,0,0,.5);
   }
   .timer-panel.show { transform: translateY(0); }
-  .tp-grab { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.2); margin: 0 auto 14px; }
+  .tp-grab { width: 40px; height: 4px; border-radius: 2px; background: rgba(15,23,42,.18); margin: 0 auto 14px; }
   .tp-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
   .tp-tab { flex: 1; padding: 9px; border-radius: 10px; border: none; background: var(--card-2); color: var(--text-dim); font-size: 13px; cursor: pointer; }
   .tp-tab.on { background: var(--accent); color: #431407; font-weight: 700; }
   .tp-display { text-align: center; font-size: 52px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 2px; margin: 6px 0 14px; }
   .tp-presets { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
-  .tp-preset { border: 1px solid rgba(255,255,255,.15); background: transparent; color: var(--text); border-radius: 999px; padding: 7px 16px; font-size: 13px; cursor: pointer; }
+  .tp-preset { border: 1px solid rgba(15,23,42,.15); background: transparent; color: var(--text); border-radius: 999px; padding: 7px 16px; font-size: 13px; cursor: pointer; }
   .tp-preset.on { background: rgba(249,115,22,.2); border-color: var(--accent); color: var(--accent); }
   .tp-controls { display: flex; gap: 10px; }
   .tp-btn { flex: 1; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; }
@@ -510,9 +535,9 @@
   /* 底部导航 */
   .bottom-nav {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
-    background: rgba(30,41,59,.96);
+    background: rgba(255,255,255,.96);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(255,255,255,.08);
+    border-top: 1px solid rgba(15,23,42,.09);
     display: flex; padding-bottom: env(safe-area-inset-bottom);
   }
   .nav-item {
@@ -562,18 +587,18 @@
   .menu-item {
     display: flex; align-items: center; gap: 12px;
     padding: 15px 16px; font-size: 14px;
-    border-bottom: 1px solid rgba(255,255,255,.05);
+    border-bottom: 1px solid rgba(15,23,42,.06);
     cursor: pointer; user-select: none;
   }
   .menu-item:last-child { border-bottom: none; }
   .menu-item .arrow { margin-left: auto; color: var(--text-dim); }
   .menu-item.warn { color: var(--danger); }
   .menu-item input[type="time"], .menu-item select {
-    margin-left: auto; background: var(--card-2); border: 1px solid rgba(255,255,255,.1);
+    margin-left: auto; background: var(--card-2); border: 1px solid rgba(15,23,42,.12);
     border-radius: 8px; color: var(--text); font-size: 14px; padding: 6px 10px; outline: none;
   }
   .menu-item input[type="password"], .menu-item input[type="text"], .menu-item input[type="url"] {
-    margin-left: auto; background: var(--card-2); border: 1px solid rgba(255,255,255,.1);
+    margin-left: auto; background: var(--card-2); border: 1px solid rgba(15,23,42,.12);
     border-radius: 8px; color: var(--text); font-size: 12px; padding: 7px 10px; outline: none;
     width: 170px;
   }
@@ -854,6 +879,14 @@
       <div class="gp-meta" id="gpMeta"></div>
     </div>
   </div>
+  <div class="gp-section" id="gpSetsSec" style="display:none">
+    <h4>✅ 组数打卡</h4>
+    <div class="ex-sets" id="gpSets" style="margin-top:0"></div>
+    <div class="gp-actions">
+      <button class="btn btn-ghost" id="gpTimerBtn">⏳ 计时</button>
+      <button class="btn btn-green" id="gpDoneBtn">✓ 完成此动作</button>
+    </div>
+  </div>
   <div class="gp-section">
     <h4>📖 动作要领</h4>
     <div id="gpPoints"></div>
@@ -1082,7 +1115,19 @@ const EXDB = {
     caution: "先掌握静态弓步蹲再尝试跳跃版。" },
   "平板交替摸肩": { icon: "🪢", muscle: "核心",
     points: ["平板姿势，双脚略分开增加稳定", "交替抬起一手摸对侧肩膀", "骨盆尽量不动，对抗旋转"],
-    caution: "腰部塌陷或身体晃动大说明速度过快，放慢。" }
+    caution: "腰部塌陷或身体晃动大说明速度过快，放慢。" },
+  "肩部绕环": { icon: "🔄", muscle: "热身",
+    points: ["双臂自然下垂，双肩向前缓慢绕环 10 次，再向后 10 次", "幅度由小到大，让肩关节充分活动开"],
+    caution: "动作放慢，不要靠惯性甩动。" },
+  "猫式伸展": { icon: "🐱", muscle: "热身",
+    points: ["四足跪姿，吸气塌腰抬头（牛式），呼气拱背低头（猫式）", "缓慢交替 10 次，全程配合呼吸"],
+    caution: "腰椎不适者减小动作幅度。" },
+  "髋关节绕环": { icon: "🦵", muscle: "热身",
+    points: ["手扶墙单腿站立，另一条腿屈膝抬起做髋关节绕环", "每侧 10 次，前后两个方向都要做"],
+    caution: "扶稳支撑物，避免失去平衡。" },
+  "腿部摆动": { icon: "🤸", muscle: "热身",
+    points: ["扶墙单腿站立，另一条腿直腿前后摆动、左右摆动", "每侧各 10 次，幅度逐渐加大"],
+    caution: "核心收紧，用腿部发力而非甩腰。" }
 };
 
 /* ============================================================
@@ -1283,62 +1328,76 @@ function guideHtml(exObj) {
   return h;
 }
 
+function equipOf(name) {
+  if (/\u6760\u94c3/.test(name)) return "\u6760\u94c3";
+  if (/\u54d1\u94c3/.test(name)) return "\u54d1\u94c3";
+  if (/\u9ad8\u4f4d\u4e0b\u62c9|\u5750\u59ff\u5212\u8239|\u7ef3\u7d22|\u5012\u8e6c|\u817f\u5f2f\u4e3e|\u817f\u5c48\u4f38|\u608d\u9a6c/.test(name)) return "\u56fa\u5b9a\u5668\u68b0";
+  if (/\u5f15\u4f53\u5411\u4e0a/.test(name)) return "\u5355\u6760";
+  return "\u81ea\u91cd";
+}
+const WARMUPS = ["\u80a9\u90e8\u7ed5\u73af", "\u732b\u5f0f\u4f38\u5c55", "\u9ac8\u5173\u8282\u7ed5\u73af", "\u817f\u90e8\u6446\u52a8"];
 function renderDay() {
   const plan = getPlan(curDow);
   const content = document.getElementById("dayContent");
   const today = new Date().getDay();
-  document.getElementById("dayTitle").textContent = (curDow === today ? "今日训练 · " : "") + DOW_NAMES[curDow];
+  document.getElementById("dayTitle").textContent = (curDow === today ? "\u4eca\u65e5\u8bad\u7ec3 \u00b7 " : "") + DOW_NAMES[curDow];
   document.getElementById("focusTag").textContent = plan.focus;
   document.getElementById("editBtn").className = "edit-btn" + (editMode ? " on" : "");
-  document.getElementById("editBtn").textContent = editMode ? "✓ 完成" : "✏️ 编辑";
+  document.getElementById("editBtn").textContent = editMode ? "\u2713 \u5b8c\u6210" : "\u270f\ufe0f \u7f16\u8f91";
   if (editMode) { renderEditMode(plan, content); return; }
   if (plan.rest) {
-    content.innerHTML = `<div class="rest-banner"><div class="emoji">😌</div><h3>今日休息</h3><p>${plan.restTip || "好好休息，恢复体力。"}</p></div>`;
+    content.innerHTML = `<div class="rest-banner"><div class="emoji">\ud83d\ude0c</div><h3>\u4eca\u65e5\u4f11\u606f</h3><p>${plan.restTip || "\u597d\u597d\u4f11\u606f\uff0c\u6062\u590d\u4f53\u529b\u3002"}</p></div>`;
     return;
   }
   const dd = dayData(curDow);
-  content.innerHTML = "";
+  const allMuscle = plan.exercises.map(e => e.muscle).filter(Boolean);
+  const mainM = [...new Set(allMuscle.map(m => m.split("/")[0]))].slice(0, 3);
+  const subM = [...new Set(allMuscle.flatMap(m => m.split("/")))].filter(m => !mainM.includes(m)).slice(0, 5);
+  const totalSets = plan.exercises.reduce((a, e) => a + e.sets, 0);
+  const estKcal = Math.round((totalSets * 6 + plan.exercises.length * 10) / 5) * 5;
+  const equips = [...new Set(plan.exercises.map(e => equipOf(e.name)))];
+  content.innerHTML = `
+    <div class="dsum">
+      <div class="dsum-title">${plan.focus}</div>
+      <div class="dsum-body">
+        <div class="dsum-info">
+          <div class="dsum-line">\ud83d\udd25 \u7ea6 ${estKcal} \u5343\u5361</div>
+          <div class="dsum-line">\ud83c\udfcb\ufe0f ${plan.exercises.length} \u4e2a\u52a8\u4f5c \u00b7 \u5171 ${totalSets} \u7ec4</div>
+          <div class="dsum-line">\ud83e\uddf0 ${equips.join(" / ")}</div>
+          <div class="dsum-muscles"><b>\u4e3b\u8981\u808c\u7fa4</b>\u3000${mainM.join("\u3001") || "\u5168\u8eab"}<br><b>\u6b21\u8981\u808c\u7fa4</b>\u3000${subM.join("\u3001") || "\u2014"}</div>
+        </div>
+        <div class="dsum-fig">${bodyFigureSVG(allMuscle.join("/"))}</div>
+      </div>
+    </div>
+    <div class="sec-label">\u7ec3\u524d\u70ed\u8eab<span>${WARMUPS.length} \u4e2a\u52a8\u4f5c \u00b7 \u6bcf\u4e2a 30 \u79d2</span></div>
+    <div class="ex-grid">${WARMUPS.map(w => {
+      const g = EXDB[w];
+      return `<div class="exg-card warm" data-w="${w}"><div class="exg-ico">${g.icon}</div><div class="exg-name">${w}</div><div class="exg-tags">30\u79d2 \u00b7 \u70ed\u8eab \u00b7 \u81ea\u91cd</div></div>`;
+    }).join("")}</div>
+    <div class="sec-label">\u8bad\u7ec3\u52a8\u4f5c<span>${plan.exercises.length} \u4e2a\u52a8\u4f5c</span></div>
+    <div class="ex-grid" id="exGrid"></div>`;
+  const grid = content.querySelector("#exGrid");
   plan.exercises.forEach((exObj, idx) => {
     const done = dd.done.includes(idx);
     const hitSets = dd.sets[idx] || 0;
-    const isTimed = /秒|分钟/.test(exObj.reps);
     const card = document.createElement("div");
-    card.className = "exercise-card" + (done ? " done" : "");
+    card.className = "exg-card" + (done ? " done" : "");
     card.innerHTML = `
-      <div class="ex-top">
-        <div class="ex-icon">${exObj.icon}</div>
-        <div class="ex-info">
-          <div class="ex-name"><span class="cn">${exObj.name}</span></div>
-          <div class="ex-meta">${exObj.muscle ? exObj.muscle + " · " : ""}${exObj.sets}组 × ${exObj.reps} · 已做 ${hitSets}/${exObj.sets} 组</div>
-        </div>
-        <div class="ex-check">✓</div>
-      </div>
-      <div class="ex-detail"><div class="ex-detail-inner">
-        <div class="ex-sets">
-          ${Array.from({length: exObj.sets}, (_, s) =>
-            `<div class="set-chip ${s < hitSets ? 'hit' : ''}" data-set="${s}"><b>第${s+1}组</b>${s < hitSets ? '✓' : ''}</div>`).join("")}
-        </div>
-        ${guideHtml(exObj)}
-        <button class="ex-timer-link">${isTimed ? "⏱️ 打开动作计时" : "⏳ 组间休息计时"}</button><button class="gp-open-link">📖 完整指导</button>
-      </div></div>`;
-    card.querySelector(".ex-top").addEventListener("click", (e) => {
-      if (e.target.closest(".ex-check")) toggleExercise(idx);
-      else card.classList.toggle("open");
+      <div class="exg-check">\u2713</div>
+      <div class="exg-ico">${exObj.icon}</div>
+      <div class="exg-name">${exObj.name}</div>
+      <div class="exg-tags">${exObj.sets}\u7ec4 \u00d7 ${exObj.reps}</div>
+      <div class="exg-tags">${exObj.muscle || "\u7efc\u5408"} \u00b7 ${equipOf(exObj.name)}</div>
+      <div class="exg-prog">\u5df2\u505a ${hitSets}/${exObj.sets} \u7ec4</div>`;
+    card.querySelector(".exg-check").addEventListener("click", (e) => { e.stopPropagation(); toggleExercise(idx); });
+    card.addEventListener("click", () => openGuidePage(exObj, idx));
+    grid.appendChild(card);
+  });
+  content.querySelectorAll(".exg-card.warm").forEach(c => {
+    c.addEventListener("click", () => {
+      const g = EXDB[c.dataset.w];
+      openGuidePage({ icon: g.icon, name: c.dataset.w, sets: 1, reps: "30\u79d2", muscle: g.muscle, tip: "" });
     });
-    card.querySelector(".ex-check").addEventListener("click", (e) => { e.stopPropagation(); toggleExercise(idx); });
-    card.querySelectorAll(".set-chip").forEach(chip => {
-      chip.addEventListener("click", (e) => { e.stopPropagation(); toggleSet(idx, +chip.dataset.set); });
-    });
-    card.querySelector(".ex-timer-link").addEventListener("click", (e) => {
-      e.stopPropagation();
-      setTimerMode(isTimed ? "up" : "down");
-      toggleTimerPanel(true);
-    });
-    card.querySelector(".gp-open-link").addEventListener("click", (e) => {
-      e.stopPropagation();
-      openGuidePage(exObj);
-    });
-    content.appendChild(card);
   });
 }
 
@@ -1355,7 +1414,7 @@ const MUSCLE_ZONES = {
   glute:   { keys: ["臀"], color: "#84cc16" },
   hams:    { keys: ["腘绳"], color: "#10b981" },
   calves:  { keys: ["小腿"], color: "#06b6d4" },
-  cardio:  { keys: ["有氧", "全身", "爆发力"], color: "#f97316" }
+  cardio:  { keys: ["有氧", "全身", "爆发力", "热身"], color: "#f97316" }
 };
 function zonesForMuscle(muscleStr) {
   const hit = {};
@@ -1394,22 +1453,47 @@ function bodyFigureSVG(muscleStr) {
     <ellipse cx="58" cy="178" rx="7" ry="4" fill="${base}"/>
   </svg>`;
 }
-function openGuidePage(exObj) {
+let gpCtx = null;
+function openGuidePage(exObj, idx) {
+  gpCtx = { exObj, idx: (idx === undefined || idx === null) ? null : idx };
   const g = EXDB[exObj.name] || {};
-  document.getElementById("gpTitle").textContent = "动作指导";
-  document.getElementById("gpMuscleTag").textContent = exObj.muscle || g.muscle || "综合";
+  document.getElementById("gpTitle").textContent = "\u52a8\u4f5c\u6307\u5bfc";
+  document.getElementById("gpMuscleTag").textContent = exObj.muscle || g.muscle || "\u7efc\u5408";
   document.getElementById("gpName").textContent = exObj.name;
   document.getElementById("gpMeta").innerHTML =
-    `训练量 <b>${exObj.sets} 组 × ${exObj.reps}</b><br>目标部位 <b>${exObj.muscle || g.muscle || "全身"}</b>`;
+    `\u8bad\u7ec3\u91cf <b>${exObj.sets} \u7ec4 \u00d7 ${exObj.reps}</b><br>\u76ee\u6807\u90e8\u4f4d <b>${exObj.muscle || g.muscle || "\u5168\u8eab"}</b><br>\u5668\u68b0 <b>${equipOf(exObj.name)}</b>`;
   document.getElementById("gpFigure").innerHTML = bodyFigureSVG(exObj.muscle || g.muscle);
-  const pts = g.points && g.points.length ? g.points : [exObj.tip || "保持动作标准，控制节奏，量力而行。"];
+  const pts = g.points && g.points.length ? g.points : [exObj.tip || "\u4fdd\u6301\u52a8\u4f5c\u6807\u51c6\uff0c\u63a7\u5236\u8282\u594f\uff0c\u91cf\u529b\u800c\u884c\u3002"];
   document.getElementById("gpPoints").innerHTML = pts.map((p, i) =>
     `<div class="gp-step"><span class="num">${i + 1}</span><span class="txt">${p}</span></div>`).join("");
-  const cautions = g.caution ? [g.caution] : ["如感到关节刺痛（非肌肉酸痛），请立即停止并减轻重量。"];
+  const cautions = g.caution ? [g.caution] : ["\u5982\u611f\u5230\u5173\u8282\u523a\u75db\uff08\u975e\u808c\u8089\u9178\u75db\uff09\uff0c\u8bf7\u7acb\u5373\u505c\u6b62\u5e76\u51cf\u8f7b\u91cd\u91cf\u3002"];
   document.getElementById("gpCaution").innerHTML = cautions.map(c =>
     `<div class="gp-step"><span class="num">!</span><span class="txt">${c}</span></div>`).join("");
+  const isTimed = /\u79d2|\u5206\u949f/.test(exObj.reps);
+  document.getElementById("gpTimerBtn").textContent = isTimed ? "\u23f1\ufe0f \u52a8\u4f5c\u8ba1\u65f6" : "\u23f3 \u7ec4\u95f4\u4f11\u606f\u8ba1\u65f6";
+  document.getElementById("gpTimerBtn").onclick = () => { setTimerMode(isTimed ? "up" : "down"); toggleTimerPanel(true); };
+  document.getElementById("gpDoneBtn").onclick = () => {
+    if (gpCtx.idx === null) return;
+    toggleExercise(gpCtx.idx);
+    renderGpSets();
+  };
+  renderGpSets();
   document.getElementById("guidePage").classList.add("show");
   document.getElementById("guidePage").scrollTop = 0;
+}
+function renderGpSets() {
+  const sec = document.getElementById("gpSetsSec");
+  if (!gpCtx || gpCtx.idx === null) { sec.style.display = "none"; return; }
+  sec.style.display = "";
+  const dd = dayData(curDow);
+  const { exObj, idx } = gpCtx;
+  const hit = dd.sets[idx] || 0;
+  document.getElementById("gpSets").innerHTML = Array.from({ length: exObj.sets }, (_, s) =>
+    `<div class="set-chip ${s < hit ? "hit" : ""}" data-s="${s}"><b>\u7b2c${s + 1}\u7ec4</b>${s < hit ? "\u2713" : ""}</div>`).join("");
+  document.getElementById("gpDoneBtn").textContent = dd.done.includes(idx) ? "\u2713 \u5df2\u5b8c\u6210\uff08\u70b9\u51fb\u53d6\u6d88\uff09" : "\u2713 \u5b8c\u6210\u6b64\u52a8\u4f5c";
+  document.querySelectorAll("#gpSets .set-chip").forEach(ch => {
+    ch.onclick = () => { toggleSet(idx, +ch.dataset.s); renderGpSets(); };
+  });
 }
 function closeGuidePage() {
   document.getElementById("guidePage").classList.remove("show");
