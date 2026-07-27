@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-title" content="健身计划">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f3f8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -102,6 +104,9 @@
   }
   .rest-banner .emoji { font-size: 40px; }
   .rest-banner p { color: var(--text-dim); font-size: 14px; margin-top: 10px; line-height: 1.7; }
+  .rest-banner .btn-row { margin-top: 18px; display: flex; gap: 10px; justify-content: center; }
+  .rest-banner .btn-blue { border: none; padding: 8px 16px; border-radius: 999px; font-size: 13px; color: #fff; background: var(--blue); }
+  .rest-banner .btn-ghost { border: none; padding: 8px 16px; border-radius: 999px; font-size: 13px; color: var(--text-dim); background: var(--card-2); }
 
   .exercise-card {
     margin: 10px 16px; background: var(--card); border-radius: var(--radius);
@@ -635,6 +640,7 @@
 <header class="header">
   <h1><span class="logo">💪</span>健身计划</h1>
   <div class="date-line" id="dateLine"></div>
+  <div style="font-size:10px;color:var(--text-dim);margin-top:2px">v5.1 · 浅色模板版</div>
 </header>
 
 <!-- ========== 计划页 ========== -->
@@ -665,7 +671,8 @@
     <h2 id="dayTitle">今日训练</h2>
     <div class="right">
       <span class="focus-tag" id="focusTag"></span>
-      <button class="edit-btn" id="editBtn" onclick="toggleEditMode()">✏️ 编辑</button>
+      <button class="edit-btn" id="editBtn">✏️ 编辑</button>
+      <button class="edit-btn" id="resetBtn" style="color:var(--danger);background:rgba(239,68,68,.12)">🔄 重置</button>
     </div>
   </div>
   <div id="dayContent"></div>
@@ -1335,7 +1342,7 @@ function equipOf(name) {
   if (/\u5f15\u4f53\u5411\u4e0a/.test(name)) return "\u5355\u6760";
   return "\u81ea\u91cd";
 }
-const WARMUPS = ["\u80a9\u90e8\u7ed5\u73af", "\u732b\u5f0f\u4f38\u5c55", "\u9ac8\u5173\u8282\u7ed5\u73af", "\u817f\u90e8\u6446\u52a8"];
+const WARMUPS = ["\u80a9\u90e8\u7ed5\u73af", "\u732b\u5f0f\u4f38\u5c55", "\u9acb\u5173\u8282\u7ed5\u73af", "\u817f\u90e8\u6446\u52a8"];
 function renderDay() {
   const plan = getPlan(curDow);
   const content = document.getElementById("dayContent");
@@ -1346,7 +1353,9 @@ function renderDay() {
   document.getElementById("editBtn").textContent = editMode ? "\u2713 \u5b8c\u6210" : "\u270f\ufe0f \u7f16\u8f91";
   if (editMode) { renderEditMode(plan, content); return; }
   if (plan.rest) {
-    content.innerHTML = `<div class="rest-banner"><div class="emoji">\ud83d\ude0c</div><h3>\u4eca\u65e5\u4f11\u606f</h3><p>${plan.restTip || "\u597d\u597d\u4f11\u606f\uff0c\u6062\u590d\u4f53\u529b\u3002"}</p></div>`;
+    const isDefaultRest = PLAN_LIB[activePlanId() === "custom" ? "full" : activePlanId()].days[curDow].rest;
+    const restoreBtn = isDefaultRest ? "" : `<div class="btn-row"><button class="btn-blue" onclick=\"restoreDayDefault()\">\u6539\u4e3a\u8bad\u7ec3\u65e5\uff08\u6062\u590d\u9ed8\u8ba4\uff09</button><button class="btn-ghost" onclick=\"toggleEditMode()\">\u7f16\u8f91</button></div>`;
+    content.innerHTML = `<div class="rest-banner"><div class="emoji">\ud83d\ude0c</div><h3>\u4eca\u65e5\u4f11\u606f</h3><p>${plan.restTip || "\u597d\u597d\u4f11\u606f\uff0c\u6062\u590d\u4f53\u529b\u3002"}</p>${restoreBtn}</div>`;
     return;
   }
   const dd = dayData(curDow);
@@ -1549,10 +1558,8 @@ function renderEditMode(plan, content) {
         <div class="edit-row"><label>备注</label><textarea class="f-tip" rows="2" placeholder="可选，补充说明（动作要领由指导库自动匹配）">${exObj.tip || ""}</textarea></div>
       </div>`;
     });
-    html += `<div class="edit-actions"><button class="btn btn-blue" onclick="addExercise()">＋ 添加动作</button><button class="btn btn-green" onclick="saveCustomPlan()">💾 保存计划</button></div>`;
-  } else {
-    html += `<div class="edit-actions"><button class="btn btn-green" onclick="saveCustomPlan()">💾 保存计划</button></div>`;
   }
+  html += `<div class="edit-actions"><button class="btn btn-blue" onclick="addExercise()">＋ 添加动作</button><button class="btn btn-green" onclick="saveCustomPlan()">💾 保存计划</button></div>`;
   html += `<div class="edit-actions" style="margin-top:0"><button class="btn btn-ghost" onclick="editMode=false;renderAll()">取消</button></div>`;
   content.innerHTML = html;
 }
@@ -1581,7 +1588,7 @@ function collectEditData() {
     focus: focusEl && focusEl.value.trim() ? focusEl.value.trim() : plan.focus,
     rest: isRest,
     restTip: tipEl ? tipEl.value.trim() : (plan.restTip || ""),
-    exercises: isRest ? (plan.exercises || []) : exercises
+    exercises: JSON.parse(JSON.stringify(isRest ? (plan.exercises || []) : exercises))
   };
 }
 function addExercise() {
@@ -1592,8 +1599,13 @@ function addExercise() {
 }
 function delExercise(idx) { collectEditData(); store.customPlan[curDow].exercises.splice(idx, 1); saveStore(); renderDay(); }
 function saveCustomPlan() { collectEditData(); saveStore(); editMode = false; renderAll(); toast("计划已保存 ✓"); }
+function restoreDayDefault() {
+  const def = PLAN_LIB[activePlanId() === "custom" ? "full" : activePlanId()].days[curDow];
+  if (!store.customPlan) store.customPlan = {};
+  store.customPlan[curDow] = JSON.parse(JSON.stringify(def));
+  saveStore(); editMode = false; renderAll(); toast("已恢复当天默认计划");
+}
 function restoreDefaultPlan() {
-  if (!confirm("恢复默认计划？你的自定义修改将丢失（打卡记录保留）。")) return;
   delete store.customPlan; store.activePlan = "full";
   saveStore(); editMode = false; renderAll(); toast("已恢复默认计划");
 }
@@ -2438,6 +2450,33 @@ function resetAll() {
 }
 function renderAll() { renderTabs(); renderDay(); renderOverview(); }
 
+/* 数据自修复：检测异常 customPlan（全部休息日或空数据）自动清除 */
+function repairData() {
+  if (store.customPlan) {
+    [1,2,3,4,5,6,0].forEach(dow => {
+      const d = store.customPlan[dow];
+      if (!d) return;
+      const def = PLAN_LIB[activePlanId() === "custom" ? "full" : activePlanId()].days[dow];
+      if (d.rest && !def.rest && (!d.exercises || d.exercises.length === 0)) {
+        console.log("[修复] 检测到" + DOW_NAMES[dow] + "被错误标记为休息日，已从默认计划重建");
+        store.customPlan[dow] = JSON.parse(JSON.stringify(def));
+      }
+    });
+  }
+  if (!store.customPlan) return;
+  let hasTraining = false;
+  [1,2,3,4,5,6,0].forEach(dow => {
+    const d = store.customPlan[dow];
+    if (d && !d.rest && d.exercises && d.exercises.length > 0) hasTraining = true;
+  });
+  if (!hasTraining) {
+    console.log("[修复] 检测到异常 customPlan（无任何训练日），已自动清除");
+    delete store.customPlan;
+    store.activePlan = "full";
+    saveStore();
+  }
+}
+
 /* ================= 初始化 ================= */
 document.getElementById("dateLine").textContent =
   new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric", weekday: "long" });
@@ -2450,6 +2489,10 @@ document.getElementById("aiKey").value = _s.aiKey || "";
 document.getElementById("aiBase").value = _s.aiBase || "";
 document.getElementById("aiModel").value = _s.aiModel || "";
 setTimerMode("down");
+repairData();
+// 绑定编辑/重置按钮（避免 iOS Safari 内联 onclick 偶发不触发）
+document.getElementById("editBtn").addEventListener("click", toggleEditMode);
+document.getElementById("resetBtn").addEventListener("click", restoreDefaultPlan);
 renderAll();
 </script>
 </body>
