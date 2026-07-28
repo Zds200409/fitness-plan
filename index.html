@@ -633,6 +633,30 @@
   .cel-box h3 { margin-top: 10px; font-size: 18px; }
   .cel-box p { color: var(--text-dim); font-size: 13px; margin-top: 6px; }
   .cel-btn { margin-top: 18px; background: var(--primary); color: #052e16; border: none; font-size: 14px; font-weight: 700; padding: 11px 32px; border-radius: 999px; cursor: pointer; }
+
+  /* 动作/热身挑选器 */
+  .mini-btn { margin-left: 8px; border: 1px solid #e2e5ee; background: var(--card-2); color: var(--text); font-size: 11px; padding: 3px 9px; border-radius: 999px; cursor: pointer; }
+  .picker-mask { position: fixed; inset: 0; z-index: 95; background: rgba(0,0,0,.5); display: none; }
+  .picker-mask.show { display: block; }
+  .picker { position: fixed; left: 0; right: 0; bottom: 0; z-index: 96; max-height: 80vh; background: var(--card); border-radius: 18px 18px 0 0; display: flex; flex-direction: column; animation: slideUp .25s ease; }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .picker-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; }
+  .picker-head h4 { font-size: 16px; margin: 0; }
+  .picker-head .x { font-size: 24px; color: var(--text-dim); background: none; border: none; cursor: pointer; line-height: 1; }
+  .picker-search { margin: 0 16px 8px; }
+  .picker-search input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid #e2e5ee; border-radius: 10px; background: var(--card-2); color: var(--text); font-size: 14px; }
+  .picker-body { overflow-y: auto; padding: 0 16px 12px; -webkit-overflow-scrolling: touch; }
+  .picker-group-t { font-size: 13px; font-weight: 700; color: var(--text-dim); margin: 12px 0 6px; }
+  .picker-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--card-2); margin-bottom: 7px; cursor: pointer; }
+  .picker-item:active { opacity: .7; }
+  .picker-item .pi-ico { font-size: 22px; width: 28px; text-align: center; }
+  .picker-item .pi-name { font-size: 15px; font-weight: 600; }
+  .picker-item .pi-sub { font-size: 12px; color: var(--text-dim); margin-left: 8px; }
+  .picker-item .pi-check { margin-left: auto; font-size: 18px; color: var(--primary); }
+  .picker-foot { display: flex; gap: 8px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid #e2e5ee; }
+  .picker-foot .btn { flex: 1; }
+  .picker-multi .pi-check { visibility: hidden; }
+  .picker-multi .picker-item.on .pi-check { visibility: visible; }
 </style>
 </head>
 <body>
@@ -1134,7 +1158,88 @@ const EXDB = {
     caution: "扶稳支撑物，避免失去平衡。" },
   "腿部摆动": { icon: "🤸", muscle: "热身",
     points: ["扶墙单腿站立，另一条腿直腿前后摆动、左右摆动", "每侧各 10 次，幅度逐渐加大"],
-    caution: "核心收紧，用腿部发力而非甩腰。" }
+    caution: "核心收紧，用腿部发力而非甩腰。" },
+  "扩胸臂绕环": { icon: "💪", muscle: "热身",
+    points: ["双臂侧平举，以肩为轴做大幅前后绕环，向前 10 次再向后 10 次", "配合扩胸打开胸腔，活动肩胸关节"],
+    caution: "绕环幅度由小到大，避免耸肩。" },
+  "踝关节绕环": { icon: "🦶", muscle: "热身",
+    points: ["单脚支撑，另一脚尖点地做踝关节顺时针、逆时针绕环", "每侧各 10 次，活动脚踝灵活度"],
+    caution: "支撑腿微屈，保持身体稳定。" },
+  "颈肩放松": { icon: "🙆", muscle: "热身",
+    points: ["缓慢做颈部前屈、后仰、左右侧屈各 5 次", "双肩向上耸起再下沉放松，重复 10 次"],
+    caution: "动作轻柔，不要快速转头。" },
+  "开合跳": { icon: "🤾", muscle: "热身",
+    points: ["双脚跳开与肩同宽，双手举过头顶击掌", "再跳回并拢、双手放回体侧，连续 30-45 秒"],
+    caution: "落地轻盈、膝盖微屈缓冲；心肺不适者减小幅度。" },
+  "原地慢跑": { icon: "🏃", muscle: "热身",
+    points: ["原地小步慢跑或快走，手臂自然摆动", "持续 3-5 分钟至身体微微出汗"],
+    caution: "速度由慢到快，作为心肺激活即可。" },
+  "高抬腿": { icon: "🦵", muscle: "热身",
+    points: ["快速交替抬膝至腰腹高度，手臂配合摆动", "前脚掌着地，持续 20-30 秒"],
+    caution: "背部挺直、核心收紧，避免身体后仰。" },
+  "后踢腿": { icon: "🦿", muscle: "热身",
+    points: ["快速交替将脚后跟踢向臀部", "持续 20-30 秒，激活大腿后侧"],
+    caution: "身体不要前后晃动，保持节奏稳定。" },
+  "最伟大拉伸": { icon: "🧘", muscle: "热身",
+    points: ["弓步姿势，同侧手肘触脚内侧地面", "同侧手向上打开并旋转躯干看指尖，左右各 5 次"],
+    caution: "前膝不超脚尖，动作缓慢有控制。" },
+  "毛毛虫伸展": { icon: "🐛", muscle: "热身",
+    points: ["双手撑地，双脚尽量不弯走向前爬成平板", "再走回站立，脚跟着地拉伸小腿"],
+    caution: "手腕有压迫感则减小幅度，核心收紧。" },
+  "招财猫": { icon: "💫", muscle: "热身",
+    points: ["屈肘 90° 贴紧身体，前臂向前、向外、向后画圈", "缓慢转动 10-15 次，活动肩关节"],
+    caution: "肘部始终贴紧肋骨，不要耸肩。" },
+  "C字绕肩": { icon: "🔠", muscle: "热身",
+    points: ["双臂下垂，以肩为轴画小幅 C 字绕环", "前后各 10 次，幅度由小到大"],
+    caution: "动作轻柔，不要靠惯性甩动。" },
+  "弹力带肩外展": { icon: "🎯", muscle: "热身",
+    points: ["双手握弹力带与肩同宽，肩胛后缩向两侧拉开", "拉至胸口后缓慢回放，10-12 次"],
+    caution: "无弹力带可徒手扩胸代替；避免耸肩。" },
+  "扩胸运动": { icon: "🫳", muscle: "热身",
+    points: ["双臂侧平举，向后扩胸并夹紧肩胛骨", "缓慢重复 10 次，打开胸腔"],
+    caution: "挺胸收腹，不要含胸驼背。" },
+  "婴儿摇摆": { icon: "🙇", muscle: "热身",
+    points: ["跪坐小腿上，双手向前延伸，可换角度延展", "放松背阔肌与胸椎，3 个角度各停留"],
+    caution: "膝盖有疼痛则垫软物或减小幅度。" },
+  "超人式": { icon: "🦸", muscle: "热身",
+    points: ["俯卧，双臂前伸，同时抬起手臂与双腿离地", "收紧背肌停留 1 秒，重复 8-10 次"],
+    caution: "腰部不代偿发力，动作轻缓。" },
+  "侧弓步": { icon: "↔️", muscle: "热身",
+    points: ["向一侧跨步下蹲，对侧腿伸直，重心落在跨步腿", "左右交替各 10 次，拉伸大腿内侧"],
+    caution: "膝盖对准脚尖方向，不内扣。" },
+  "抱膝走": { icon: "🤗", muscle: "热身",
+    points: ["向前行走时双手抱单膝拉向胸口，支撑腿可提踵", "左右交替各 10-12 次，激活臀髋"],
+    caution: "站立腿微屈保持平衡。" },
+  "弓步走": { icon: "🚶", muscle: "热身",
+    points: ["向前迈大步成弓步，前膝不超脚尖，后膝近地", "左右交替各 10-12 步"],
+    caution: "上身直立，骨盆中立不前倾。" },
+  "徒手深蹲": { icon: "🍑", muscle: "热身",
+    points: ["双脚与肩同宽，下蹲至大腿近水平再站起", "膝盖对准脚尖，做 10-15 次预热臀腿"],
+    caution: "脚跟不抬离地面，避免膝盖内扣。" },
+  "前后摆腿": { icon: "🦵", muscle: "热身",
+    points: ["扶墙单腿站立，另一条腿前后摆动 10-12 次", "再换腿，激活髋屈/髋伸肌群"],
+    caution: "幅度渐进，核心收紧不甩腰。" },
+  "侧摆腿": { icon: "↔️", muscle: "热身",
+    points: ["扶墙单腿站立，另一条腿左右侧向摆动 10-12 次", "激活髋外展/内收肌群"],
+    caution: "上半身稳定，仅摆动的腿动。" },
+  "臀桥": { icon: "🌉", muscle: "热身",
+    points: ["仰卧屈膝，抬起臀部至肩-膝成直线", "顶峰收缩 1 秒后缓慢放下，10-12 次"],
+    caution: "用臀部发力，避免腰部代偿。" },
+  "死虫式": { icon: "🐛", muscle: "热身",
+    points: ["仰卧屈膝 90°，双臂指天，对侧手脚缓慢下放", "腰部贴地，每侧 10-15 次"],
+    caution: "腰部始终贴地，不拱起。" },
+  "鸟狗式": { icon: "🐶", muscle: "热身",
+    points: ["四足支撑，同时伸出对侧手臂与腿，停留 1 秒", "缓慢收回换边，每侧 10-15 次"],
+    caution: "骨盆稳定不晃，避免塌腰。" },
+  "平板支撑": { icon: "🟰", muscle: "热身",
+    points: ["前臂撑地，身体成一条直线，收紧腹臀", "保持 20-30 秒，激活核心稳定"],
+    caution: "不塌腰不撅臀，肩背放松。" },
+  "手腕绕环": { icon: "✋", muscle: "热身",
+    points: ["双手握拳，顺时针、逆时针绕动腕关节各 10 圈", "活动手腕灵活度"],
+    caution: "动作轻柔，腕部有不适减小幅度。" },
+  "提踵": { icon: "🦶", muscle: "热身",
+    points: ["双脚与肩同宽，缓慢踮起脚尖再落下", "每侧 15 次，激活小腿与踝关节"],
+    caution: "扶墙保持平衡，控制节奏。" }
 };
 
 /* ============================================================
@@ -1342,7 +1447,58 @@ function equipOf(name) {
   if (/\u5f15\u4f53\u5411\u4e0a/.test(name)) return "\u5355\u6760";
   return "\u81ea\u91cd";
 }
-const WARMUPS = ["\u80a9\u90e8\u7ed5\u73af", "\u732b\u5f0f\u4f38\u5c55", "\u9acb\u5173\u8282\u7ed5\u73af", "\u817f\u90e8\u6446\u52a8"];
+const WARMUP_LIB = {
+  "肩部绕环":   { region:"肩臂", zones:["shoulder","chest","back","biceps","triceps","forearm"] },
+  "扩胸臂绕环": { region:"肩臂", zones:["chest","shoulder","back"] },
+  "髋关节绕环": { region:"腿臀", zones:["glute","quads","hams","calves"] },
+  "腿部摆动":   { region:"腿臀", zones:["quads","hams","glute","calves"] },
+  "高抬腿":     { region:"全身", zones:["quads","glute","cardio","core"] },
+  "招财猫":     { region:"肩臂", zones:["shoulder","biceps","triceps"] },
+  "徒手深蹲":   { region:"腿臀", zones:["quads","glute","hams","calves"] },
+  "毛毛虫伸展": { region:"腿臀", zones:["hams","calves","core","shoulder"] },
+  "死虫式":     { region:"核心", zones:["core"] },
+  "平板支撑":   { region:"核心", zones:["core"] },
+  "鸟狗式":     { region:"核心", zones:["core","back"] },
+  "颈肩放松":   { region:"肩臂", zones:["shoulder","chest"] },
+  "C字绕肩":    { region:"肩臂", zones:["shoulder"] },
+  "弹力带肩外展": { region:"肩臂", zones:["shoulder","back"] },
+  "扩胸运动":   { region:"胸背", zones:["chest","shoulder","back"] },
+  "婴儿摇摆":   { region:"胸背", zones:["back","shoulder","core"] },
+  "超人式":     { region:"胸背", zones:["back","shoulder"] },
+  "侧弓步":     { region:"腿臀", zones:["glute","quads","hams"] },
+  "抱膝走":     { region:"腿臀", zones:["glute","quads"] },
+  "弓步走":     { region:"腿臀", zones:["glute","quads","hams","calves"] },
+  "臀桥":       { region:"腿臀", zones:["glute","hams","core"] },
+  "前后摆腿":   { region:"腿臀", zones:["glute","quads","hams"] },
+  "侧摆腿":     { region:"腿臀", zones:["glute","quads","hams"] },
+  "后踢腿":     { region:"腿臀", zones:["hams","quads"] },
+  "最伟大拉伸": { region:"全身", zones:["shoulder","chest","back","glute","quads","hams","calves","core"] },
+  "开合跳":     { region:"全身", zones:["cardio"] },
+  "原地慢跑":   { region:"全身", zones:["cardio"] },
+  "踝关节绕环": { region:"踝腕", zones:["calves"] },
+  "手腕绕环":   { region:"踝腕", zones:["forearm"] },
+  "提踵":       { region:"踝腕", zones:["calves"] },
+  "猫式伸展":   { region:"核心", zones:["core","back"] }
+};
+function warmupsForDay(plan) {
+  const z = {};
+  const muscleStr = plan.exercises.map(e => e.muscle).filter(Boolean).join("/");
+  Object.assign(z, zonesForMuscle(muscleStr), zonesForMuscle(plan.focus || ""));
+  const keys = Object.keys(z);
+  const names = ["猫式伸展"];
+  for (const name in WARMUP_LIB) {
+    if (name === "猫式伸展") continue;
+    if (WARMUP_LIB[name].zones.some(zk => keys.includes(zk))) names.push(name);
+    if (names.length >= 4) break;
+  }
+  if (names.length < 3) {
+    for (const g of ["肩部绕环","髋关节绕环","腿部摆动","扩胸臂绕环","高抬腿","开合跳","踝关节绕环","颈肩放松"]) {
+      if (!names.includes(g)) names.push(g);
+      if (names.length >= 4) break;
+    }
+  }
+  return names.slice(0,4);
+}
 function renderDay() {
   const plan = getPlan(curDow);
   const content = document.getElementById("dayContent");
@@ -1365,6 +1521,10 @@ function renderDay() {
   const totalSets = plan.exercises.reduce((a, e) => a + e.sets, 0);
   const estKcal = Math.round((totalSets * 6 + plan.exercises.length * 10) / 5) * 5;
   const equips = [...new Set(plan.exercises.map(e => equipOf(e.name)))];
+  const warmKey = activePlanId() + "|" + curDow;
+  const warmOverride = store.warmups && store.warmups[warmKey];
+  const warmList = (warmOverride && warmOverride.length) ? warmOverride : warmupsForDay(plan);
+  const warmIsAuto = !warmOverride || !warmOverride.length;
   content.innerHTML = `
     <div class="dsum">
       <div class="dsum-title">${plan.focus}</div>
@@ -1378,8 +1538,8 @@ function renderDay() {
         <div class="dsum-fig">${bodyFigureSVG(allMuscle.join("/"))}</div>
       </div>
     </div>
-    <div class="sec-label">\u7ec3\u524d\u70ed\u8eab<span>${WARMUPS.length} \u4e2a\u52a8\u4f5c \u00b7 \u6bcf\u4e2a 30 \u79d2</span></div>
-    <div class="ex-grid">${WARMUPS.map(w => {
+    <div class="sec-label">\u7ec3\u524d\u70ed\u8eab<span>${warmList.length} \u4e2a\u52a8\u4f5c \u00b7 \u6bcf\u4e2a 30 \u79d2 <button class="mini-btn" onclick="openWarmPicker()">\ud83e\uddf8 ${warmIsAuto ? "\u66f4\u6362" : "\u5df2\u81ea\u9009"}</button></span></div>
+    <div class="ex-grid">${warmList.map(w => {
       const g = EXDB[w];
       return `<div class="exg-card warm" data-w="${w}"><div class="exg-ico">${g.icon}</div><div class="exg-name">${w}</div><div class="exg-tags">30\u79d2 \u00b7 \u70ed\u8eab \u00b7 \u81ea\u91cd</div></div>`;
     }).join("")}</div>
@@ -1559,7 +1719,7 @@ function renderEditMode(plan, content) {
       </div>`;
     });
   }
-  html += `<div class="edit-actions"><button class="btn btn-blue" onclick="addExercise()">＋ 添加动作</button><button class="btn btn-green" onclick="saveCustomPlan()">💾 保存计划</button></div>`;
+  html += `<div class="edit-actions"><button class="btn btn-blue" onclick="openTrainPicker()">📚 从库选</button><button class="btn" onclick="addExercise()">＋ 手动添加</button><button class="btn btn-green" onclick="saveCustomPlan()">💾 保存</button></div>`;
   html += `<div class="edit-actions" style="margin-top:0"><button class="btn btn-ghost" onclick="editMode=false;renderAll()">取消</button></div>`;
   content.innerHTML = html;
 }
@@ -1599,6 +1759,115 @@ function addExercise() {
 }
 function delExercise(idx) { collectEditData(); store.customPlan[curDow].exercises.splice(idx, 1); saveStore(); renderDay(); }
 function saveCustomPlan() { collectEditData(); saveStore(); editMode = false; renderAll(); toast("计划已保存 ✓"); }
+
+/* ================= 动作 / 热身 挑选器 ================= */
+function showPicker(opt) {
+  closePicker();
+  const mask = document.createElement("div"); mask.className = "picker-mask";
+  const sheet = document.createElement("div");
+  sheet.className = "picker" + (opt.multi ? " picker-multi" : "");
+  let selected = new Set(opt.selected || []);
+  const renderBody = (filter) => {
+    const f = (filter || "").trim().toLowerCase();
+    let html = "";
+    opt.groups.forEach(g => {
+      const items = g.items.filter(it => !f || it.name.toLowerCase().includes(f) || (it.sub || "").toLowerCase().includes(f));
+      if (!items.length) return;
+      html += `<div class="picker-group-t">${g.title}（${items.length}）</div>`;
+      items.forEach(it => {
+        const on = selected.has(it.key) ? " on" : "";
+        const vis = selected.has(it.key) ? "visible" : "hidden";
+        html += `<div class="picker-item${on}" data-key="${it.key}"><div class="pi-ico">${it.icon}</div><div class="pi-name">${it.name}</div><div class="pi-sub">${it.sub || ""}</div><div class="pi-check" style="visibility:${vis}">✓</div></div>`;
+      });
+    });
+    if (!html) html = `<div style="text-align:center;color:var(--text-dim);padding:30px">没有匹配的动作</div>`;
+    return html;
+  };
+  sheet.innerHTML = `
+    <div class="picker-head"><h4>${opt.title}</h4><button class="x" onclick="closePicker()">×</button></div>
+    <div class="picker-search"><input id="pkSearch" placeholder="搜索动作名称…" value=""></div>
+    <div class="picker-body" id="pkBody">${renderBody("")}</div>
+    <div class="picker-foot" id="pkFoot"></div>`;
+  const foot = sheet.querySelector("#pkFoot");
+  (opt.extraButtons || []).forEach(b => {
+    const btn = document.createElement("button");
+    btn.className = "btn " + (b.cls || "");
+    btn.textContent = b.label;
+    btn.onclick = () => b.onClick(selected);
+    foot.appendChild(btn);
+  });
+  const ok = document.createElement("button");
+  ok.className = "btn btn-green"; ok.textContent = opt.okLabel || "确定";
+  ok.onclick = () => { opt.onConfirm([...selected]); closePicker(); };
+  foot.appendChild(ok);
+  sheet.querySelector("#pkBody").addEventListener("click", (e) => {
+    const item = e.target.closest(".picker-item");
+    if (!item) return;
+    const key = item.dataset.key;
+    if (opt.multi) {
+      if (selected.has(key)) selected.delete(key); else selected.add(key);
+      item.classList.toggle("on");
+    } else {
+      selected = new Set([key]);
+      opt.onConfirm([key]); closePicker();
+    }
+  });
+  const search = sheet.querySelector("#pkSearch");
+  search.addEventListener("input", () => { sheet.querySelector("#pkBody").innerHTML = renderBody(search.value); });
+  mask.onclick = (e) => { if (e.target === mask) closePicker(); };
+  document.body.appendChild(mask); document.body.appendChild(sheet);
+  requestAnimationFrame(() => mask.classList.add("show"));
+}
+function closePicker() { document.querySelectorAll(".picker-mask, .picker").forEach(e => e.remove()); }
+function openWarmPicker() {
+  const warmKey = activePlanId() + "|" + curDow;
+  const cur = (store.warmups && store.warmups[warmKey]) || [];
+  const groups = {};
+  for (const name in WARMUP_LIB) {
+    const r = WARMUP_LIB[name].region;
+    (groups[r] = groups[r] || []).push({ key: name, icon: EXDB[name].icon, name, sub: r });
+  }
+  const order = ["全身", "肩臂", "胸背", "腿臀", "核心", "踝腕"];
+  const grpList = order.filter(r => groups[r]).map(r => ({ title: r + "热身", items: groups[r] }));
+  showPicker({
+    title: "选择热身动作", multi: true, groups: grpList, selected: cur, okLabel: "保存热身",
+    extraButtons: cur.length ? [{ label: "恢复自动推荐", cls: "btn-ghost", onClick: () => {
+      if (!store.warmups) store.warmups = {}; delete store.warmups[warmKey];
+      saveStore(); closePicker(); renderDay(); toast("已恢复自动推荐热身");
+    } }] : [],
+    onConfirm: (keys) => {
+      if (!store.warmups) store.warmups = {};
+      if (!keys.length) delete store.warmups[warmKey];
+      else store.warmups[warmKey] = keys;
+      saveStore(); renderDay(); toast("热身已更新 ✓");
+    }
+  });
+}
+function openTrainPicker() {
+  const groups = {};
+  for (const name in EXDB) {
+    const e = EXDB[name];
+    if (e.muscle === "热身") continue;
+    const main = (e.muscle || "其他").split("/")[0];
+    (groups[main] = groups[main] || []).push({ key: name, icon: e.icon, name, sub: e.muscle || "" });
+  }
+  const order = ["胸", "背", "肩", "腿", "核心", "全身", "有氧", "器械", "其他"];
+  const grpList = order.filter(r => groups[r]).map(r => ({ title: r + "训练", items: groups[r] }));
+  Object.keys(groups).forEach(r => { if (!order.includes(r)) grpList.push({ title: r, items: groups[r] }); });
+  showPicker({
+    title: "从动作库选择训练动作", multi: false, groups: grpList, selected: [],
+    onConfirm: (keys) => { if (keys[0]) addExerciseFromLib(keys[0]); }
+  });
+}
+function addExerciseFromLib(name) {
+  collectEditData();
+  const d = EXDB[name] || {};
+  if (!store.customPlan) store.customPlan = {};
+  if (!store.customPlan[curDow]) store.customPlan[curDow] = { focus: getPlan(curDow).focus, rest: false, restTip: "", exercises: [] };
+  store.customPlan[curDow].rest = false;
+  store.customPlan[curDow].exercises.push({ icon: d.icon || "🏋️", name, sets: 3, reps: "12次", tip: "", muscle: d.muscle || "" });
+  saveStore(); renderDay(); toast("已添加：" + name);
+}
 function restoreDayDefault() {
   const def = PLAN_LIB[activePlanId() === "custom" ? "full" : activePlanId()].days[curDow];
   if (!store.customPlan) store.customPlan = {};
